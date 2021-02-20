@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500&family=Yusei+Magic&display=swap');
+html {
+    box-sizing: border-box;
+    font-size: 62.5%; // 10px / 16px = 62.5% => 1rem = 10px  
+    min-height: 100vh;
+    font-family: 'Quicksand', sans-serif;
+    // font-family: 'Yusei Magic', sans-serif;
+}
+
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+::selection {
+    background-color: orangered;
+    color: #fff;
+    font-weight: 400;
+
+}
+
+body    {
+    background: linear-gradient(hsl(209, 59%, 31%) 0%, hsl(209, 96%, 9%) 50%, hsl(209, 96%, 12%) 100%);
+    padding: 1rem;
+}
+
+
+
+.game{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(10rem, min-content)) ;
+    grid-template-rows: repeat(2, minmax(min-content, 45vh));
+    gap: 4rem;
+    justify-content: center;
+
+
+
+}
+
+
+.records{
+    // background-color: orangered;
+    grid-row: 1 / -1;
+    grid-column: 1 / span 1;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    
+}
+
+.details, .high_scores{
+    padding: 1rem;
+    // background-color: lightblue;
+    border: thick double hsla(0, 0%, 100%, 0.19);
+    border-radius: 5px;
+    
+}
+
+.details > span {
+    display: block;
+    color: #fff;
+    margin: .5rem 1rem;
+    text-align: right;
+    text-transform: uppercase;
+    font-weight: lighter;
+
+}
+
+.display, .best_players{
+    // display: block;
+    padding: .2rem 1rem;
+    text-align: center;
+    border-radius: 0 0 7px 7px ;
+    background: linear-gradient(rgba(248, 248, 248, 0.1) 0%, hsla(0, 0%, 10%, 0.2) 20% ,hsla(0, 0%, 7%, 0.226) 50%, transparent 100%);
+    border: inset  2px hsla(0, 0%, 0%, 0.375);
+}
+
+
+.high_scores{
+    color: #fff;
+    text-align: center;
+    
+}
+.high_scores .tag{
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.topnotch :not(:last-child){
+    margin-bottom: .5rem;
+}
+.best_players{
+    display: flex;
+}
+.best{
+    margin-right: auto;
+}
+
+.top_scores{
+    color: greenyellow;
+    text-align: right;
+    margin-left: 2.5rem;
+}
+
+.game_board{
+    grid-row: 1 / -1;
+    grid-column: 2 / span 1;
+    margin: auto 0;
+}
+
+canvas#tetris  {
+    background-color: hsla(0, 0%, 6%, 1.0);
+    border: 10px solid rgb(124, 123, 123);
+}
+canvas#nextPiece  {
+    background: linear-gradient(rgba(248, 248, 248, 0.1) 0%, hsla(0, 0%, 10%, 0.2) 20% ,hsla(0, 0%, 7%, 0.226) 50%, transparent 100%);
+    border: thick double hsla(0, 0%, 100%, 0.19);
+    padding: 2rem;
+    // border: 2px solid #fff;
+}
+
+.game_hints{
+    // background-color: lightblue;
+    grid-row: 1 / -1;
+    grid-column: 3 / span 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    
+    margin: 5vh 0;
+}
+
+.next_piece .tag{
+    text-align: center;
+    margin: 1rem auto;
+
+//  width: 5rem;
+}
+
+.player2{
+    display: none;
+}
+

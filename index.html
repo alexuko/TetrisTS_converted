@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./src/css/main.scss" />
+</head>
+<body>
+
+    
+    <div class="game">
+        
+        <div class="records">
+            <div class="details">
+                <span class="score">
+                    <div class="tag">score</div>
+                    <div class="display">
+                        <strong class="current_score">100</strong>
+                    </div>
+                </span>
+                <span class="level">
+                    <div class="tag">level</div>
+                    <div class="display">
+                        <strong class="current_level">1</strong>
+                    </div>
+                </span>
+                <span class="lines">
+                    <div class="tag">lines</div>
+                    <div class="display">
+                        <strong class="current_lines">1</strong>
+                    </div>
+                </span>
+                <span class="player">
+                    <div class="tag">player</div>
+                    <div class="display">
+                        <strong class="current_player">Unknown</strong>
+                    </div>
+                </span>
+            </div>
+            
+            <div class="high_scores">
+                <div class="tag">high scores</div>
+                <span class="topnotch">
+                    <div class="best_players">
+                        <div class="best">alex</div>
+                        <strong class="top_scores">1500000</strong>
+                    </div>
+                    <div class="best_players">
+                        <div class="best">robert</div>
+                        <strong class="top_scores">150000</strong>
+                    </div>
+                    <div class="best_players">
+                        <div class="best">dennys</div>
+                        <strong class="top_scores">15000</strong>
+                    </div>
+                </span>
+
+            </div>
+        </div>
+        
+        <div class="game_board">
+            <canvas id="tetris"></canvas>
+        </div>
+        
+        <div class="game_hints">
+            <div class="next_piece">
+                <div class="tag">Next</div>
+                <canvas id="nextPiece" width="80" height="60"></canvas>
+            </div>
+            <div class="player2"></div>
+        </div>
+
+    </div>
+
+
+<script src="./src/js/app.js"></script>
+</body>
+</html>
