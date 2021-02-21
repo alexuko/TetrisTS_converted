@@ -292,14 +292,15 @@ const moveLeft = (rotateAction = false) => {
         }
     }
 
-    
 const rotate = (clockwise:boolean, rotTimes: number = 0) => {
     try {
+        console.log(`***** START *****`)
         console.log(`Rotation-times: ${rotTimes}`)
         
         const initialPosition = piece.position;
         const initial_X = piece.x;
         const initial_Y = piece.y;
+        console.log(`initpos: ${initialPosition}, initX:${initial_X}, initY:${initial_Y}`)
         
         // Check if the piece will rotate clockwise or counterclockwise
         let rotation = clockwise ? 1 : -1;
@@ -307,46 +308,37 @@ const rotate = (clockwise:boolean, rotTimes: number = 0) => {
         if (rotTimes === 0) erasePiece(GBctx, piece);
         // Increment the number of rotation times by 1
         rotTimes++;
-        // position 0 - 1 = -1 + 4 = 3 % 4 = 3
-        // position 0 + 1 = 1 % 4 = 1
-        // position 1 + 1 = 2 % 4 = 2
-        // Move to prev or next tetrominoe position
-        console.log(piece.tetrominoe.length);
+        //get next position of the tetrominoe (clockwise | counterclockwise)
         piece.position = mod(piece.position + rotation, piece.tetrominoe.length);
-        console.log('piece.position ' + piece.position);
         // get the position from the original tetrominoe and pass it to the active tetrominoe
         piece._activeTetrominoe = piece.tetrominoe[piece.position];
         // Check if the piece overlapped with the wall, if it did then call wallkick()
-        // Arrage the piece to a correct place within the gameboard
+        // Arrange the piece to a correct place within the gameboard
         if (collision(moveTowards('rotate'))) wallKick();
-        // Check that piece did not overlapped with another piece after rotation
+        // Now check that pieces do not overlap
         if (!piecesOverlapped()) {
-            // If it did not then redraw the piece and finish method
             drawPiece(GBctx, piece)
-            console.log(piece._activeTetrominoe);
             return;
         }
+        //if pieces overlapped then 
+        // Check that piece did not overlapped with another piece after rotation
+        let result = SRS(initial_X,initial_Y,clockwise,rotTimes);
         
-        // if piece overlapped then fix overlap
-        fixOverlap();
-        // if piece still overlapping then rotate piece until a suitable nerby space for it 
-        if (piecesOverlapped()) {
-            rotTimes === 4 && piece.x + (piece._activeTetrominoe.length - 1) < COL ? piece.moveTo(moveTowards('right')) : piece.moveTo(moveTowards('left'));
-            rotTimes === 8 && piece.y + (piece._activeTetrominoe.length - 1) < ROW ? piece.moveTo(moveTowards('down')) : piece.moveTo(moveTowards('up'));
-            rotTimes === 12 && piece.x > COL ? piece.moveTo(moveTowards('left')) : piece.moveTo(moveTowards('right'));
-            rotTimes === 16 && piece.y >= 0 ? piece.moveTo(moveTowards('up')) : piece.moveTo(moveTowards('down'));
-            if (rotTimes === 20) { // do not do anything and leave piece on its original position
-                console.log('initial position')
-                piece.x = initial_X;
-                piece.y = initial_Y;
-                piece.position = initialPosition;
-                drawPiece(GBctx, piece)
-                return;
-            }
-            rotate(clockwise, rotTimes);
+        //if results are the same than when piece overlapped, ALL tests in SRS failed, then, DO NOT rotate piece
+        if(result[0] === initial_X && result[1] === initial_Y) {
+            piece.position = initialPosition;
+            piece.x = initial_X;
+            piece.y = initial_Y;
+            // console.log(`allFailpos: ${piece.position}, allFailX:${initial_X}, allFailY:${initial_Y}`)            
+        }else{
+            //position was already changed and new values are assigned to X & Y
+            piece.position;
+            piece.x = result[0];
+            piece.y = result[1];
         }
-
-        // Once piece does not overlap then redraw piece on the Gameboard
+        // Once piece does not overlap then redraw piece on the Gameboard        
+        console.log(`FINAL position: ${piece.position}, X:${piece.x}, Y:${piece.y}`)            
+        console.log(piece._activeTetrominoe)            
         drawPiece(GBctx, piece)
     } catch (e) {
         console.error(`There was an error roating the piece ${e}`)
@@ -355,72 +347,163 @@ const rotate = (clockwise:boolean, rotTimes: number = 0) => {
 
 }
 
-const fixOverlap = () => {
-    let new_x, new_y;
-    //loop through all of the rows
-    for (let r = 0; r < piece._activeTetrominoe.length; r++) { 
-        //for each row loop through all of the columns
-        for (let c = 0; c < piece._activeTetrominoe[r].length; c++) { 
-            // skip zeros in the tetrominoe matrix
-            if (!piece._activeTetrominoe[r][c]) continue; 
-            new_x = piece.x + c;
-            new_y = piece.y + r;
-            // in 5 tetrominoes, length will be of "2"                
-            let last = piece._activeTetrominoe.length - 1; 
+/**
+ * Moves current piece in different coordenats until it does not overlap with another piece.
+ * @param x X coordinate when piece was rotated 
+ * @param y Y coordinate when piece was rotated
+ * @param num times SRS has been executed
+ */
+const SRS = (xVal:number, yVal:number,clockwise:boolean,rotaTimes:number, testTimes?:number) => {
+    //J, L, S, T, Z tetrominoes test
+    const test1 = [
+      [1,0],  // X 1 pos right
+      [1,1],  // X 1 pos right & Y 1 pos down
+      [0,-2], // Y 2 pos up
+      [1,-2], // X 1 pos right & Y 2 pos up 
+    ];
+    const test2 = [
+      [-1,0],//  X to the left
+      [-1,-1],// X 1 pos left & Y 1 pos up
+      [0,2],//   Y 2 pos down
+      [-1,2],//  X 1 pos left & Y 2 pos down
+    ];
+    const test3 = [
+      [-1,0],//  X to the left
+      [-1,1],//  X to the left & Y 1 pos down
+      [0,-2],//  Y 2 pos up
+      [-1,-2],// X 1 pos left & Y 2 pos up
+    ];
+    const test4 = [
+      [1,0], //  X 1 pos right
+      [1,-1],//  X 1 pos right & Y 1 pos up
+      [0,2], //  Y 2 pos down
+      [1,2], //  X 1 pos right & Y 2 pos down
+    ];
+    // I tetrominoe tests    
+    const test5 = [
+        [2,0],//  X 2 pos to the right
+        [-1,0],// X 1 pos to the left
+        [2,-1],// X 2 pos to the right & Y 1 pos up
+        [-1,2]//  X 1 pos to the left & 2 pos down
+        
+    ]
+    const test6 = [
+        [1,0],//  X 1 pos to the right
+        [-2,0],// X 2 pos to the left
+        [1,2],//  X 1 pos to the right & Y 2 pos down
+        [2,-1]//  X 2 pos to the left & 1 pos up
+        
+    ]
+    const test7 = [
+        [-2,0],// X 2 pos left
+        [1,0],//  X 1 pos right
+        [-2,1],// X 2 pos left & Y 1 pos down
+        [1,-2]//  X 1 pos right & Y 2 pos up 
 
-            // console.log('*******Now********')
-            // console.log(`r:${r} C:${c}`)
-            // console.log(`piece.y:${piece.y} piece.x:${piece.x}`)
-            // console.log(`yC:${new_y} xC:${new_x}`)
-            // console.log(`last ${last}`)
-            // console.log(`board ${gameBoard[new_y][new_x]}  so ${gameBoard[new_y][new_x]}`)
-            /**
-             * TRIPLE CHECK THIS LOGIC
-             */
-            if (c === 0 && piece._activeTetrominoe[r][0] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit left`)
-                piece.moveTo(moveTowards('right'));
-            } else if (c === last && piece._activeTetrominoe[r][last] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit right`)
-                piece.moveTo(moveTowards('left'))
-            } else if (r === last && piece._activeTetrominoe[last][c] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit bottom`)
-                piece.moveTo(moveTowards('up'))
-            } else if (r === 0 && piece._activeTetrominoe[0][c] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit top`)
-                piece.moveTo(moveTowards('down'))
-            }
+    ]
+    const test8 = [
+        [-1,0],//  X 1 pos left 
+        [2,0],//   X 2 pos right
+        [-1,-2],// X 1 pos left & Y 2 pos up
+        [2,1]//    X 1 pos right & Y 1 pos down
+    ]
 
+    let count = !testTimes ? 0 : testTimes;
+    console.log("tetrominoe to fit:")
+    console.log(piece._activeTetrominoe)
+    if(rotaTimes > 4 ) return [xVal,yVal];
+    
+    let offsets: number[][] = []; 
+    
+    if(piece.number !== 6){
+        //S,Z,T,L,J tetrominoes
+        // console.log(`S,Z,T,L,J tetrominoes test number ${count}`)
+        if(clockwise){
+            if(rotaTimes === 1) offsets = test1; 
+            if(rotaTimes === 2) offsets = test2;
+            if(rotaTimes === 3) offsets = test3;
+            if(rotaTimes === 4) offsets = test4;   
+        }else{
+            if(rotaTimes === 1) offsets = test4;
+            if(rotaTimes === 2) offsets = test3;
+            if(rotaTimes === 3) offsets = test2;
+            if(rotaTimes === 4) offsets = test1;
+            
         }
+    }else{
+        //is I tetrominoe
+        if(clockwise){
+            if(rotaTimes === 1) offsets = test5; 
+            if(rotaTimes === 2) offsets = test6;
+            if(rotaTimes === 3) offsets = test7;
+            if(rotaTimes === 4) offsets = test8;
+        
+        }else{
+            if(rotaTimes === 1) offsets = test8;
+            if(rotaTimes === 2) offsets = test7;
+            if(rotaTimes === 3) offsets = test6;
+            if(rotaTimes === 4) offsets = test5;
+        }
+            
     }
+
+    // console.log(offsets)
+    // console.log(`piece before offset x:${piece.x}, y:${piece.y}  `)
+    piece.x += offsets[count][0];
+    piece.y += offsets[count][1];
+    // console.log(`piece after offset x:${piece.x}, y:${piece.y}  `)
+     
+    if (piecesOverlapped()) {
+      count++; //increment 1 to the count
+      piece.x = xVal; //set the original X value to reevaluate
+      piece.y = yVal; //set the original Y value to reevaluate
+
+      if (count < offsets.length) {
+        SRS(piece.x, piece.y, clockwise, rotaTimes, count); //same test, next index
+      } else {
+        count = 0;
+        if (rotaTimes < offsets.length) rotate(clockwise, rotaTimes);
+        else return [xVal, yVal];
+      }
+    }
+    // console.log(`pieces did not overlapped x:${piece.x}, y:${piece.y}`)
+    return [piece.x, piece.y];    
+    
 }
+
 
 const piecesOverlapped = () => {
-    try {
-        let new_x, new_y;
-        for (let r = 0; r < piece._activeTetrominoe.length; r++) { //loop through all of the rows
-            for (let c = 0; c < piece._activeTetrominoe[r].length; c++) { //for each row loop through all of the columns
-                if (!piece._activeTetrominoe[r][c]) continue; // skip zeros in the tetrominoe matrix
-                new_x = piece.x + c; // New x (column) position from each square of the tetrominoe
-                new_y = piece.y + r; // New y (row)    position from each square of the tetrominoe
-                // if any of the squares lands on a non empty position in the board then, it overlapped
-                // or piece 
-                if (gameBoard[new_y][new_x] !== empty || // If its = 1
-                    new_y < 0 || new_y >= ROW) { // if piece goes beyound ceiling or floor 
-                    console.log('pieces overlapped')
-                    return true
-                }
-            }
+  try {
+    let new_x, new_y;
+    for (let r = 0; r < piece._activeTetrominoe.length; r++) {
+      //loop through all of the rows
+      for (let c = 0; c < piece._activeTetrominoe[r].length; c++) {
+        //for each row loop through all of the columns
+        if (!piece._activeTetrominoe[r][c]) continue; // skip zeros in the tetrominoe matrix
+        new_x = piece.x + c; // New x (column) position from each square of the tetrominoe
+        new_y = piece.y + r; // New y (row)    position from each square of the tetrominoe
+        console.log(` gameboard: ${gameBoard[new_y][new_x]}, newX: ${new_x}, newY: ${new_y} `)
+        // if any of the squares lands on a non empty position in the board then, it overlapped
+        // or piece
+        // If its not = 0
+        if (gameBoard[new_y][new_x] === undefined || gameBoard[new_y][new_x] !== empty ||// if square set in a occupied or undefined space (beyond gameboard)
+            new_y < 0 || new_y > ROW - 1 || // if piece goes beyond ceiling or floor
+            new_x < 0 || new_x > COL - 1) { // if piece goes beyond walls
+          console.log("pieces overlapped");
+          return true;
         }
-        // console.log('does not overlap')
-        // Piece did not overlapped 
-        return false;
-
-    } catch (e) {
-        console.error(`There was an error while checking if pieces overlapped: ${e}`)
-
+      }
     }
-}
+    // console.log('does not overlap')
+    // Piece did not overlapped
+    return false;
+  } catch (e) {
+    console.error(
+      `There was an error while checking if pieces overlapped: ${e}`
+    );
+    return true;
+  }
+};
 
 
 // const collision = (dir) => {
@@ -645,3 +728,104 @@ const init = () => {
 
 //Start Game
 init();
+
+
+//===========================
+// STUFF I MIGHT NEED LATER
+//===========================
+/*
+//OLD ROTATE METHOD - NOT WORKING WITH SRS -  LEAVE IT JUST IN CASE    
+const rotate = (clockwise:boolean, rotTimes: number = 0) => {
+    try {
+        console.log(`Rotation-times: ${rotTimes}`)
+        
+        const initialPosition = piece.position;
+        const initial_X = piece.x;
+        const initial_Y = piece.y;
+        
+        // Check if the piece will rotate clockwise or counterclockwise
+        let rotation = clockwise ? 1 : -1;
+        // If this is the first time that the piece rotates then erase the piece
+        if (rotTimes === 0) erasePiece(GBctx, piece);
+        // Increment the number of rotation times by 1
+        rotTimes++;
+        // position 0 - 1 = -1 + 4 = 3 % 4 = 3
+        // position 0 + 1 = 1 % 4 = 1
+        // position 1 + 1 = 2 % 4 = 2
+        // Move to prev or next tetrominoe position
+        console.log(piece.tetrominoe.length);
+        piece.position = mod(piece.position + rotation, piece.tetrominoe.length);
+        console.log('piece.position ' + piece.position);
+        // get the position from the original tetrominoe and pass it to the active tetrominoe
+        piece._activeTetrominoe = piece.tetrominoe[piece.position];
+        // Check if the piece overlapped with the wall, if it did then call wallkick()
+        // Arrage the piece to a correct place within the gameboard
+        if (collision(moveTowards('rotate'))) wallKick();
+        // Check that piece did not overlapped with another piece after rotation
+        if (!piecesOverlapped()) {
+            // If it did not then redraw the piece and finish method
+            drawPiece(GBctx, piece)
+            console.log(piece._activeTetrominoe);
+            return;
+        }
+        
+        // if piece overlapped then fix overlap
+        fixOverlap();
+        // if piece still overlapping then rotate piece until a suitable nerby space for it 
+        if (piecesOverlapped()) {
+            rotTimes === 4 && piece.x + (piece._activeTetrominoe.length - 1) < COL ? piece.moveTo(moveTowards('right')) : piece.moveTo(moveTowards('left'));
+            rotTimes === 8 && piece.y + (piece._activeTetrominoe.length - 1) < ROW ? piece.moveTo(moveTowards('down')) : piece.moveTo(moveTowards('up'));
+            rotTimes === 12 && piece.x > COL ? piece.moveTo(moveTowards('left')) : piece.moveTo(moveTowards('right'));
+            rotTimes === 16 && piece.y >= 0 ? piece.moveTo(moveTowards('up')) : piece.moveTo(moveTowards('down'));
+            if (rotTimes === 20) { // do not do anything and leave piece on its original position
+                console.log('initial position')
+                piece.x = initial_X;
+                piece.y = initial_Y;
+                piece.position = initialPosition;
+                drawPiece(GBctx, piece)
+                return;
+            }
+            rotate(clockwise, rotTimes);
+        }
+
+        // Once piece does not overlap then redraw piece on the Gameboard
+        drawPiece(GBctx, piece)
+    } catch (e) {
+        console.error(`There was an error roating the piece ${e}`)
+    }
+
+
+}
+
+
+OLD OVERLAP FIX - LEAVE IT, JUST IN CASE
+const fixOverlap = () => {
+    let new_x, new_y;
+    //loop through all of the rows
+    for (let r = 0; r < piece._activeTetrominoe.length; r++) { 
+        //for each row loop through all of the columns
+        for (let c = 0; c < piece._activeTetrominoe[r].length; c++) { 
+            // skip zeros in the tetrominoe matrix
+            if (!piece._activeTetrominoe[r][c]) continue; 
+            new_x = piece.x + c;
+            new_y = piece.y + r;
+            // in 5 tetrominoes, length will be of "2"                
+            let last = piece._activeTetrominoe.length - 1; 
+            if (c === 0 && piece._activeTetrominoe[r][0] !== empty && gameBoard[new_y][new_x] !== empty) {
+                console.error(`hit left`)
+                piece.moveTo(moveTowards('right'));
+            } else if (c === last && piece._activeTetrominoe[r][last] !== empty && gameBoard[new_y][new_x] !== empty) {
+                console.error(`hit right`)
+                piece.moveTo(moveTowards('left'))
+            } else if (r === last && piece._activeTetrominoe[last][c] !== empty && gameBoard[new_y][new_x] !== empty) {
+                console.error(`hit bottom`)
+                piece.moveTo(moveTowards('up'))
+            } else if (r === 0 && piece._activeTetrominoe[0][c] !== empty && gameBoard[new_y][new_x] !== empty) {
+                console.error(`hit top`)
+                piece.moveTo(moveTowards('down'))
+            }
+
+        }
+    }
+}
+*/
