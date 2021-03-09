@@ -5,7 +5,7 @@ export default class Piece {
   private _y: number;
   private _position: number;
   private _tetrominoe: number[][][];
-  public _activeTetrominoe: number[][];
+  private _activeTetrominoe: number[][];
 
   constructor(tetrominoe: number[][][], color: number[], number: number) {
     this._tetrominoe  = tetrominoe; //tetrominoe with its positions
@@ -23,9 +23,18 @@ export default class Piece {
       return this._color;
   }
 
-   public get tetrominoe() {
+  public get tetrominoe() {
     return this._tetrominoe;
   }
+
+  public set activeTetrominoe(newPosition:number[][]) {
+    this._activeTetrominoe = newPosition;
+
+  }
+  public get activeTetrominoe() {
+    return this._activeTetrominoe;
+  }
+
 
   public get position() {
     return this._position;

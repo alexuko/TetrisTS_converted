@@ -1,46 +1,26 @@
-// Canvas measures
-export const COL = 10;
-export const ROW = 22;
-export const SQ = 20;
-
-const colors = [
-    [0, 0, 10, 20],  // empty 
-    [276, 94, 61, 100],  // T-tetromino 
-    [31, 94, 48, 100],  // L-tetromino
-    [230, 98, 50, 100],  // J-tetromino
-    [100, 60, 48, 100],   // S-tetromino
-    [356, 100, 40, 100], // Z-tetromino
-    [58, 85, 52, 100],  // O-tetromino
-    [192, 44, 85, 100]  // I-tetromino 
-]
-
-export const getColor = (pick:number) => {
-    return colors[pick];
-}
-
 
 
 /***** TETROMINOES *******/
-export let tetrominoes = [
+let tetrominoes = [
     // [0] T-tetrominoe
     [
   
-        [ 
+        [ // Position - 0
             [0, 1, 0],
             [1, 1, 1],
             [0, 0, 0]
         ],
-        [ 
+        [ // Position - 1
             [0, 1, 0],
             [0, 1, 1],
             [0, 1, 0]
         ],
-        [ 
+        [ // Position - 2
             [0, 0, 0],
             [1, 1, 1],
             [0, 1, 0]
         ],
-        [   
+        [ // Position - 3  
             [0, 1, 0],
             [1, 1, 0],
             [0, 1, 0]
@@ -49,22 +29,22 @@ export let tetrominoes = [
     // [1] L-tetrominoe
     [
         
-        [ 
+        [ // Position - 0
             [0, 0, 2],
             [2, 2, 2],
             [0, 0, 0]
         ],
-        [ 
+        [ // Position - 1
             [0, 2, 0],
             [0, 2, 0],
             [0, 2, 2]
         ],
-        [ 
+        [ // Position - 2
             [0, 0, 0],
             [2, 2, 2],
             [2, 0, 0]
         ],
-        [ 
+        [ // Position - 3
             [2, 2, 0],
             [0, 2, 0],
             [0, 2, 0]
@@ -72,22 +52,22 @@ export let tetrominoes = [
     ],
     // [2] J-tetrominoe
     [
-        [ 
+        [ // Position - 0
             [3, 0, 0],
             [3, 3, 3],
             [0, 0, 0]
         ],
-        [ 
+        [ // Position - 1
             [0, 3, 3],
             [0, 3, 0],
             [0, 3, 0]
         ],
-        [ 
+        [ // Position - 2
             [0, 0, 0],
             [3, 3, 3],
             [0, 0, 3]
         ],
-        [ 
+        [ // Position - 3
             [0, 3, 0],
             [0, 3, 0],
             [3, 3, 0]
@@ -95,22 +75,22 @@ export let tetrominoes = [
     ],
     // [3] S-tetrominoe
     [   
-        [ 
+        [ // Position - 0
             [0, 4, 4],
             [4, 4, 0],
             [0, 0, 0]
         ],
-        [   
+        [ // Position - 1  
             [0, 4, 0],
             [0, 4, 4],
             [0, 0, 4]
         ],
-        [   
+        [ // Position - 2  
             [0, 0, 0],
             [0, 4, 4],
             [4, 4, 0]
         ],
-        [ 
+        [ // Position - 3
             [4, 0, 0],
             [4, 4, 0],
             [0, 4, 0]
@@ -119,17 +99,17 @@ export let tetrominoes = [
     ],
     // [4] Z-tetrominoe
     [
-        [ 
+        [ // Position - 0
             [5, 5, 0],
             [0, 5, 5],
             [0, 0, 0]
         ],
-        [   
+        [ // Position - 1  
             [0, 0, 5],
             [0, 5, 5],
             [0, 5, 0]
         ],
-        [ 
+        [ // Position - 2
             [0, 0, 0],
             [5, 5, 0],
             [0, 5, 5]
@@ -141,7 +121,7 @@ export let tetrominoes = [
         ],
     ],
     [   
-        [   
+        [   // Position - 0,1,2,3
             [0, 0, 0, 0],
             [0, 6, 6, 0],
             [0, 6, 6, 0],
@@ -150,26 +130,26 @@ export let tetrominoes = [
     ],
     // [6] I-tetrominoe
     [   
-        [
+        [ // Position - 0
             [0, 0, 0, 0],
             [7, 7, 7, 7],
             [0, 0, 0, 0],
             [0, 0, 0, 0]
         ]
         ,
-        [
+        [ // Position - 1
             [0, 0, 7, 0],
             [0, 0, 7, 0],
             [0, 0, 7, 0],
             [0, 0, 7, 0]
         ],
-        [
+        [ // Position - 2
             [0, 0, 0, 0],
             [0, 0, 0, 0],
             [7, 7, 7, 7],
             [0, 0, 0, 0]
         ],
-        [
+        [ // Position - 3
             [0, 7, 0, 0],
             [0, 7, 0, 0],
             [0, 7, 0, 0],
@@ -179,3 +159,5 @@ export let tetrominoes = [
 
 ]
 
+
+export default tetrominoes;

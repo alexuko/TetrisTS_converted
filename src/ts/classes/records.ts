@@ -39,19 +39,21 @@ export default class Records {
     let levelUI = document.querySelector("strong.current_level")!;
     this._level = level;
     levelUI.textContent = this._level.toString();
-    return level;
+    return this._level;
   }
 
   setScore(score: number = 0) {
     let scoreUI = document.querySelector("strong.current_score")!;
     this._score = score;
     scoreUI.textContent = this._score.toString();
+    return this._score;
   }
 
   setLines(lines: number = 0) {
     let linesUI = document.querySelector("strong.current_lines")!;
     this._lines = lines;
     linesUI.textContent = this._lines.toString();
+    return this._lines;
   }
   
   setName(name: string) {
