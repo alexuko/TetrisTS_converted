@@ -5,8 +5,10 @@ import Brush from "./classes/brush";
 import Records from "./classes/records";
 import Piece from "./classes/piece";
 import * as tests from "./classes/SRS_offsets";
+import { SessionState } from "node:http2";
 
 let score: number,
+  player: string,
   lines: number,
   level: number,
   speed: number = 0,
@@ -38,6 +40,37 @@ type Path = [string, number];
 //String Literal Type so not other string than the ones within Pathway will be accepted
 type Pathway = "up" | "down" | "left" | "right" | "rotate";
 
+// -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
+const ws = new WebSocket('ws://localhost:8080');        
+     
+ws.addEventListener('open', () => {
+    console.log('Ready to rock you are connected')        
+    
+})
+
+ws.addEventListener('message', msgRecv => {
+    console.log(`Message received from Server`)
+    try{
+        const dataReceived = JSON.parse(msgRecv.data);
+        console.log(dataReceived);        
+    }catch(e){
+        return;
+    }
+})
+
+
+ws.addEventListener('close', () => {
+    console.log('desconnected from the server')
+})
+// -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
+
+/**
+ * State of the game
+ * This data will be send to the server
+ */ 
+let data:any = { }
+
+
 const startGame = (e: any) => {
   e.preventDefault();
   const arr = Array.from(formValues).map((el) => el.value);
@@ -49,7 +82,8 @@ const startGame = (e: any) => {
   );
   //   console.log(speed)
   backdrop.style.display = "none";
-  init(playerName, speed);
+  init(playerName, speed);  
+  
 };
 
 const init = (name: string, selectedLevel: number) => {
@@ -66,6 +100,7 @@ const init = (name: string, selectedLevel: number) => {
   score = records.score;
   lines = records.lines;
   level = records.level;
+  player = records.player;
   speed = selectedLevel;
   update();
 };
@@ -215,14 +250,22 @@ const checkFullRows = () => {
     level = records.setLevel(speed);
     console.log(`level: ${level} speed: ${speed} lines: ${lines}`);
     spinPoints = 0;
+    data.player = player;
+    data.lines = lines;
+    data.level = level;
+    data.gameBoard = gameBoard;
+
+    ws.send(JSON.stringify(data));
   }
 };
 
 const setSpeed = (linesCompleted: number, level: number) => {
   // 5 - 1 = 4/10
+  const levelCompleted = 10;
   if (linesCompleted <= 0) return 1;
   //if modulo is zero then increment level by one, otherwise just return current level
-  return linesCompleted % 10 !== 0 ? speed : speed++;
+  return linesCompleted % levelCompleted !== 0 ? speed : speed += 1;
+  
 };
 
 const pullRowsDown = (from: number) => {
@@ -491,7 +534,7 @@ const piecesOverlapped = () => {
   }
 };
 
-// const collision = (dir) => {
+
 
 const collision = (dir: Path) => {
   // console.log('**********************')
