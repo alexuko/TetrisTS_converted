@@ -17,7 +17,7 @@
                 <input type="text" class="input-value player-name" placeholder="unknown" name="player">
                 <label for="level">Level: 1 - 15</label>
                 <input type="number" class="input-value level" name="level" min="1" max="15" value="1">
-                <input type="submit" class="submit-btn" value="Play">
+                <input type="submit" class="btn submit-btn" value="Play">
             </form>
         </div>
     </div>
@@ -69,10 +69,15 @@
                 </span>
 
             </div>
-        </div>        
-        <div class="game_board">
+        </div>      
+          
+        <div class="game-area-box">
             <canvas id="tetris"></canvas>
-        </div>        
+            <div class="controls">
+                <button id="play-pause" class="btn btn-pause">Pause</button>
+            </div>            
+        </div>    
+
         <div class="game_hints">
             <div class="next_piece">
                 <div class="tag">Next</div>

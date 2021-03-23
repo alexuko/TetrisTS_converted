@@ -1,11 +1,11 @@
-import tetrominoes from "./classes/tetrominoes";
+import tetrominoes from "./assets/tetrominoes";
 import { SQ, ROW, COL, getColor, mod } from "./assets/assets";
 import Gameboard from "./classes/gameBoard";
 import Brush from "./classes/brush";
 import Records from "./classes/records";
 import Piece from "./classes/piece";
-import * as tests from "./classes/SRS_offsets";
-import { SessionState } from "node:http2";
+import * as tests from "./assets/SRS_offsets";
+
 
 let score: number,
   player: string,
@@ -18,6 +18,7 @@ let score: number,
   lockedPiece: boolean,
   records: Records,
   nextPiece: Piece | null = null,
+  gamePaused:boolean,
   gameOver = true,
   spinPoints = 0,
   start = Date.now();
@@ -62,6 +63,7 @@ ws.addEventListener('message', msgRecv => {
 ws.addEventListener('close', () => {
     console.log('desconnected from the server')
 })
+
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 
 /**
@@ -70,7 +72,45 @@ ws.addEventListener('close', () => {
  */ 
 let data:any = { }
 
+const sendGameStatus = () => {
+  //send all of the necesary data to the server
+  // data.player = player;
+  // data.lines = lines;
+  // data.level = level;
+  // data.gameBoard = gameBoard;
+  data.rivalRecords = records;
+  data.rivalPiece = piece;
+  data.rivalGameBoard = gameBoard;
 
+  ws.send(JSON.stringify(data));  
+
+
+}
+
+
+const pauseButton = document.querySelector('#play-pause')!;
+const pauseGame = () => {  
+  //change status of the game with event listener
+  gamePaused = !gamePaused;
+  //change button dialog
+  let buttonState = '';
+  //if game is paused 
+  if(gamePaused){
+    pauseButton.classList.remove('btn-pause')
+    buttonState = 'Play';
+    pauseButton.classList.add('btn-play')
+  }
+  //if game is playing
+  else{
+    pauseButton.classList.remove('btn-play')
+    buttonState = 'Pause';
+    pauseButton.classList.add('btn-pause')
+    update();
+  }
+  //set UI button status
+  pauseButton.textContent = buttonState.toUpperCase();
+
+} 
 const startGame = (e: any) => {
   e.preventDefault();
   const arr = Array.from(formValues).map((el) => el.value);
@@ -249,13 +289,8 @@ const checkFullRows = () => {
     speed = setSpeed(lines, level);
     level = records.setLevel(speed);
     console.log(`level: ${level} speed: ${speed} lines: ${lines}`);
-    spinPoints = 0;
-    data.player = player;
-    data.lines = lines;
-    data.level = level;
-    data.gameBoard = gameBoard;
-
-    ws.send(JSON.stringify(data));
+    spinPoints = 0;    
+    sendGameStatus();
   }
 };
 
@@ -534,8 +569,6 @@ const piecesOverlapped = () => {
   }
 };
 
-
-
 const collision = (dir: Path) => {
   // console.log('**********************')
   for (let r = 0; r < piece.activeTetrominoe.length; r++) {
@@ -699,19 +732,24 @@ const getNextPiece = () => {
 };
 
 const update = () => {
-  if (!gameOver) {
-    let now = Date.now();
-    let timeCounter = now - start;
 
-    const sec = 1000 / speed;
-
-    if (timeCounter > sec) {
-      moveDown();
-      start = Date.now();
+  if(!gamePaused){
+    if (!gameOver && !gameOver) {
+      let now = Date.now();
+      let timeCounter = now - start;
+  
+      const sec = 1000 / speed;
+  
+      if (timeCounter > sec) {
+        moveDown();
+        // sendGameStatus();
+        start = Date.now();
+      }
+      // eslint-disable-next-line no-unused-vars
+      requestAnimationFrame(update);
     }
-    // eslint-disable-next-line no-unused-vars
-    requestAnimationFrame(update);
-  }
+  }  
+
 };
 
 const keyControl = (e: any) => {
@@ -743,7 +781,7 @@ const keyControl = (e: any) => {
 };
 
 playBtn.addEventListener("click", startGame);
-
+pauseButton.addEventListener('click', pauseGame);
 ["keydown", "keyup"].forEach((e) => window.addEventListener(e, keyControl));
 
 // document.addEventListener("DOMContentLoaded", init,false);
