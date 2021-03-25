@@ -7,8 +7,8 @@ wss.on("connection", (ws, req) => {
   ws.send("Now, you are connected to the server!");
 
   ws.on("message", (clientMsg) => {
-    // console.log(clientMsg);
-    ws.send(`your message was received!`);
+    // console.log(`Message from Client.`)
+    ws.send(`Server received your message!`);
     
     // wss.send(`your message was received: ${clientMsg}`)
     wss.clients.forEach((client) => {
@@ -23,6 +23,7 @@ wss.on("connection", (ws, req) => {
     });
   });
 
+  // if a client closes session
   ws.on("close", () => {
     console.log("Client session closed");
   });

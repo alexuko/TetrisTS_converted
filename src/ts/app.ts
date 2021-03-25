@@ -5,6 +5,7 @@ import Brush from "./classes/brush";
 import Records from "./classes/records";
 import Piece from "./classes/piece";
 import * as tests from "./assets/SRS_offsets";
+import { sendGameStatus } from "./server/client-server";
 
 
 let score: number,
@@ -40,55 +41,14 @@ canvas.height = ROW * SQ;
 type Path = [string, number];
 //String Literal Type so not other string than the ones within Pathway will be accepted
 type Pathway = "up" | "down" | "left" | "right" | "rotate";
-
-// -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
-const ws = new WebSocket('ws://localhost:8080');        
-     
-ws.addEventListener('open', () => {
-    console.log('Ready to rock you are connected')        
-    
-})
-
-ws.addEventListener('message', msgRecv => {
-    console.log(`Message received from Server`)
-    try{
-        const dataReceived = JSON.parse(msgRecv.data);
-        console.log(dataReceived);        
-    }catch(e){
-        return;
-    }
-})
-
-
-ws.addEventListener('close', () => {
-    console.log('desconnected from the server')
-})
-
-// -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
-
 /**
  * State of the game
  * This data will be send to the server
  */ 
-let data:any = { }
-
-const sendGameStatus = () => {
-  //send all of the necesary data to the server
-  // data.player = player;
-  // data.lines = lines;
-  // data.level = level;
-  // data.gameBoard = gameBoard;
-  data.rivalRecords = records;
-  data.rivalPiece = piece;
-  data.rivalGameBoard = gameBoard;
-
-  ws.send(JSON.stringify(data));  
+let status:any = { }
 
 
-}
-
-
-const pauseButton = document.querySelector('#play-pause')!;
+const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
 const pauseGame = () => {  
   //change status of the game with event listener
   gamePaused = !gamePaused;
@@ -290,7 +250,7 @@ const checkFullRows = () => {
     level = records.setLevel(speed);
     console.log(`level: ${level} speed: ${speed} lines: ${lines}`);
     spinPoints = 0;    
-    sendGameStatus();
+    
   }
 };
 
@@ -742,7 +702,7 @@ const update = () => {
   
       if (timeCounter > sec) {
         moveDown();
-        // sendGameStatus();
+        sendGameStatus(status,piece,records,gameBoard);
         start = Date.now();
       }
       // eslint-disable-next-line no-unused-vars
