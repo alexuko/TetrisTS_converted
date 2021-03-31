@@ -45,10 +45,11 @@ type Pathway = "up" | "down" | "left" | "right" | "rotate";
  * State of the game
  * This data will be send to the server
  */ 
-let status:any = { }
+let gameStatus:any = { }
 
 
 const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
+
 const pauseGame = () => {  
   //change status of the game with event listener
   gamePaused = !gamePaused;
@@ -102,6 +103,10 @@ const init = (name: string, selectedLevel: number) => {
   level = records.level;
   player = records.player;
   speed = selectedLevel;
+  //initialize game status
+  gameStatus.piece = piece;
+  gameStatus.records = records;
+  gameStatus.gameboard = gameBoard;
   update();
 };
 
@@ -692,7 +697,6 @@ const getNextPiece = () => {
 };
 
 const update = () => {
-
   if(!gamePaused){
     if (!gameOver && !gameOver) {
       let now = Date.now();
@@ -702,7 +706,7 @@ const update = () => {
   
       if (timeCounter > sec) {
         moveDown();
-        sendGameStatus(status,piece,records,gameBoard);
+        sendGameStatus(gameStatus);
         start = Date.now();
       }
       // eslint-disable-next-line no-unused-vars
@@ -714,7 +718,8 @@ const update = () => {
 
 const keyControl = (e: any) => {
   // console.log(e)
-  if (gameOver) return;
+  if (gameOver || gamePaused) return;
+  
   else {
     if (e.type === "keydown") {
       // console.log(e.code)
@@ -743,132 +748,3 @@ const keyControl = (e: any) => {
 playBtn.addEventListener("click", startGame);
 pauseButton.addEventListener('click', pauseGame);
 ["keydown", "keyup"].forEach((e) => window.addEventListener(e, keyControl));
-
-// document.addEventListener("DOMContentLoaded", init,false);
-
-//Start Game
-// init();
-
-//===========================
-// EXPORT FUNCTIONS FOR TESTING
-//===========================
-
-//===========================
-// STUFF I MIGHT NEED LATER
-//===========================
-/*
-//OLD ROTATE METHOD - NOT WORKING WITH SRS -  LEAVE IT JUST IN CASE    
-const rotate = (clockwise:boolean, rotTimes: number = 0) => {
-    try {
-        console.log(`Rotation-times: ${rotTimes}`)
-        
-        const initialPosition = piece.position;
-        const initial_X = piece.x;
-        const initial_Y = piece.y;
-        
-        // Check if the piece will rotate clockwise or counterclockwise
-        let rotation = clockwise ? 1 : -1;
-        // If this is the first time that the piece rotates then erase the piece
-        if (rotTimes === 0) erasePiece(GBctx, piece);
-        // Increment the number of rotation times by 1
-        rotTimes++;
-        // position 0 - 1 = -1 + 4 = 3 % 4 = 3
-        // position 0 + 1 = 1 % 4 = 1
-        // position 1 + 1 = 2 % 4 = 2
-        // Move to prev or next tetrominoe position
-        console.log(piece.tetrominoe.length);
-        piece.position = mod(piece.position + rotation, piece.tetrominoe.length);
-        console.log('piece.position ' + piece.position);
-        // get the position from the original tetrominoe and pass it to the active tetrominoe
-        piece._activeTetrominoe = piece.tetrominoe[piece.position];
-        // Check if the piece overlapped with the wall, if it did then call wallkick()
-        // Arrage the piece to a correct place within the gameboard
-        if (collision(moveTowards('rotate'))) wallKick();
-        // Check that piece did not overlapped with another piece after rotation
-        if (!piecesOverlapped()) {
-            // If it did not then redraw the piece and finish method
-            drawPiece(GBctx, piece)
-            console.log(piece._activeTetrominoe);
-            return;
-        }
-        
-        // if piece overlapped then fix overlap
-        fixOverlap();
-        // if piece still overlapping then rotate piece until a suitable nerby space for it 
-        if (piecesOverlapped()) {
-            rotTimes === 4 && piece.x + (piece._activeTetrominoe.length - 1) < COL ? piece.moveTo(moveTowards('right')) : piece.moveTo(moveTowards('left'));
-            rotTimes === 8 && piece.y + (piece._activeTetrominoe.length - 1) < ROW ? piece.moveTo(moveTowards('down')) : piece.moveTo(moveTowards('up'));
-            rotTimes === 12 && piece.x > COL ? piece.moveTo(moveTowards('left')) : piece.moveTo(moveTowards('right'));
-            rotTimes === 16 && piece.y >= 0 ? piece.moveTo(moveTowards('up')) : piece.moveTo(moveTowards('down'));
-            if (rotTimes === 20) { // do not do anything and leave piece on its original position
-                console.log('initial position')
-                piece.x = initial_X;
-                piece.y = initial_Y;
-                piece.position = initialPosition;
-                drawPiece(GBctx, piece)
-                return;
-            }
-            rotate(clockwise, rotTimes);
-        }
-
-        // Once piece does not overlap then redraw piece on the Gameboard
-        drawPiece(GBctx, piece)
-    } catch (e) {
-        console.error(`There was an error roating the piece ${e}`)
-    }
-
-
-}
-
-
-OLD OVERLAP FIX - LEAVE IT, JUST IN CASE
-const fixOverlap = () => {
-    let new_x, new_y;
-    //loop through all of the rows
-    for (let r = 0; r < piece._activeTetrominoe.length; r++) { 
-        //for each row loop through all of the columns
-        for (let c = 0; c < piece._activeTetrominoe[r].length; c++) { 
-            // skip zeros in the tetrominoe matrix
-            if (!piece._activeTetrominoe[r][c]) continue; 
-            new_x = piece.x + c;
-            new_y = piece.y + r;
-            // in 5 tetrominoes, length will be of "2"                
-            let last = piece._activeTetrominoe.length - 1; 
-            if (c === 0 && piece._activeTetrominoe[r][0] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit left`)
-                piece.moveTo(moveTowards('right'));
-            } else if (c === last && piece._activeTetrominoe[r][last] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit right`)
-                piece.moveTo(moveTowards('left'))
-            } else if (r === last && piece._activeTetrominoe[last][c] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit bottom`)
-                piece.moveTo(moveTowards('up'))
-            } else if (r === 0 && piece._activeTetrominoe[0][c] !== empty && gameBoard[new_y][new_x] !== empty) {
-                console.error(`hit top`)
-                piece.moveTo(moveTowards('down'))
-            }
-
-        }
-    }
-}
-
-
-
-const moveUp = (rotateAction: boolean = false) => {
-  //check if there is no collision, if there's no,then move tetrominoe to the right 1 space
-  if (!rotateAction) {
-      
-    // if (!collision(DIRECTION.up)) {
-    if (!collision(moveTowards('up'))) {
-      //check if there is no collision and if there is not,
-      erasePiece(GBctx, piece);
-      piece.moveTo(moveTowards('up'));
-      drawPiece(GBctx, piece);
-    }
-  } else {
-    piece.moveTo(moveTowards('up'));
-    return;
-  }
-};
-
-*/

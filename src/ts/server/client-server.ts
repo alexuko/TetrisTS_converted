@@ -27,12 +27,10 @@ ws.addEventListener('close', () => {
 })
 
 
-export const sendGameStatus = (status:any, piece:Piece, records:Records, gameBoard:number[][]) => {
+export const sendGameStatus = (status:any) => {
     //send all of the necesary data to the server
-    status.rivalRecords = records;
-    status.rivalPiece = piece;
-    status.rivalGameBoard = gameBoard;
-    const data = JSON.stringify(status)
-    ws.send(data);  
+    if(status){
+        const data = JSON.stringify(status)
+        ws.send(data);  
+    }
 }
-  
