@@ -19,6 +19,10 @@
                 <input type="number" class="input-value level" name="level" min="1" max="15" value="1">
                 <input type="submit" class="btn submit-btn" value="Play">
             </form>
+            <button class="btn-small create-game-room">Create game</button>
+            <p>my room</p>
+            <input type="text" class="input-roomID" name="level" placeholder="roomID">
+            <button class="btn-small join-game-room">Join Game</button>
         </div>
     </div>
 
@@ -83,13 +87,15 @@
                 <div class="tag">Next</div>
                 <canvas id="nextPiece" width="80" height="60"></canvas>
             </div>
-            <div class="player2"></div>
+            <div class="contenders">
+                <canvas class="contender contender1"></canvas>
+                <canvas class="contender contender2"></canvas>
+                <canvas class="contender contender3"></canvas>
+                <canvas class="contender contender4"></canvas>
+            </div>
         </div>
     </div>
     
-
-
-<!-- <script src="./src/ts/server/client-server.ts"></script> -->
 <script src="./src/ts/app.ts"></script>
 </body>
 </html>

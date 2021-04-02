@@ -5,7 +5,7 @@ import Brush from "./classes/brush";
 import Records from "./classes/records";
 import Piece from "./classes/piece";
 import * as tests from "./assets/SRS_offsets";
-import { sendGameStatus } from "./server/client-server";
+import * as clientServer from "./server/client-server";
 
 
 let score: number,
@@ -22,9 +22,10 @@ let score: number,
   gamePaused:boolean,
   gameOver = true,
   spinPoints = 0,
-  start = Date.now();
-  
+  start = Date.now(),
+  sendToServer:NodeJS.Timeout;
 const empty = 0; 
+
 const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTMLInputElement>;
 const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
 const backdrop = document.querySelector(".backdrop")! as HTMLElement;
@@ -45,27 +46,35 @@ type Pathway = "up" | "down" | "left" | "right" | "rotate";
  * State of the game
  * This data will be send to the server
  */ 
-let gameStatus:any = { }
+export let gameStatus:any = { }
 
+let opponents:any = [];
 
 const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
+
+const drawOpponents = () => {
+  opponents = document.querySelectorAll('.contender')!;
+  console.log(opponents);
+}
 
 const pauseGame = () => {  
   //change status of the game with event listener
   gamePaused = !gamePaused;
   //change button dialog
   let buttonState = '';
-  //if game is paused 
-  if(gamePaused){
+  if(gamePaused){//if game on paused   
     pauseButton.classList.remove('btn-pause')
     buttonState = 'Play';
     pauseButton.classList.add('btn-play')
-  }
-  //if game is playing
-  else{
+    //stop sending data to the server
+    stopSendingData();
+  }  
+  else{ //if Playing
     pauseButton.classList.remove('btn-play')
     buttonState = 'Pause';
     pauseButton.classList.add('btn-pause')
+    //restart sending data to the server
+    startSendingData();
     update();
   }
   //set UI button status
@@ -88,6 +97,7 @@ const startGame = (e: any) => {
 };
 
 const init = (name: string, selectedLevel: number) => {
+  // clientServer.startClientConnection();
   let GB = new Gameboard(ROW, COL);
   gameBoard = GB.createGameBoard();
   brush = new Brush(SQ);
@@ -107,7 +117,9 @@ const init = (name: string, selectedLevel: number) => {
   gameStatus.piece = piece;
   gameStatus.records = records;
   gameStatus.gameboard = gameBoard;
+  startSendingData();
   update();
+  drawOpponents();
 };
 
 const moveTowards = (dir: Pathway): Path => {
@@ -696,23 +708,31 @@ const getNextPiece = () => {
   drawPiece(NPctx, nextPiece);
 };
 
+const startSendingData = () => {
+    sendToServer = setInterval(() => clientServer.sendGameStatus(gameStatus), 2000);
+  // clearInterval(sendToServer);
+}
+const stopSendingData = () => clearInterval(sendToServer);
+
 const update = () => {
   if(!gamePaused){
-    if (!gameOver && !gameOver) {
+    if (!gameOver) {
       let now = Date.now();
       let timeCounter = now - start;
   
-      const sec = 1000 / speed;
-  
+      const sec = 1000 / speed;      
+      
       if (timeCounter > sec) {
-        moveDown();
-        sendGameStatus(gameStatus);
+        moveDown();// clientServer.sendGameStatus(gameStatus);
         start = Date.now();
       }
       // eslint-disable-next-line no-unused-vars
       requestAnimationFrame(update);
     }
-  }  
+    else{
+      stopSendingData();
+    }
+  } 
 
 };
 

@@ -33,7 +33,7 @@ body    {
     top: 0;
     left: 0;
     right: 0;
-    height: 100vh;
+    height: 100%;
     background-color: rgba(17, 16, 16, 0.85);
     display: flex;
     justify-content: center;
@@ -72,6 +72,7 @@ body    {
     // background-color: purple;
     display: flex;
     flex-direction: column;
+    align-items: center;
     padding: 2rem 3.5rem;
     font-size: 20px;
 }
@@ -94,8 +95,8 @@ input[type=text]:placeholder-shown {
 input[type=text],
 input[type=number]
 {   
-    max-width: 100px;
-
+    width: 100%;
+    
     padding: .5rem 1rem;
     text-align: center;
     border-radius: 0 0 7px 7px ;
@@ -104,6 +105,12 @@ input[type=number]
     color: yellow;
     font-weight: 600;
 }
+
+input[type=number]
+{    
+    width: 75px ;
+}
+
 input[type=submit]{
     margin: 2.5rem auto;
     padding: 1rem 2rem;
@@ -117,6 +124,17 @@ input[type=submit]{
     font-size: 2rem;
     font-weight: bold;
     text-transform: uppercase;    
+}
+
+.btn-small{
+    padding: .5rem 1rem;
+    text-transform: uppercase;
+    background-color: hsla(192, 44, 85, 100);
+    border-radius: 5px;
+    border: solid 2px hsla(192, 44, 75, 100);    
+
+
+
 }
 
 .controls{    

@@ -1,11 +1,11 @@
 // MOD of positive or negative numbers
 // returns remainder of dividend by divisor
-export const mod = (dividend: number, divisor:number) =>  (dividend % divisor + divisor) % divisor;
+const mod = (dividend: number, divisor:number) =>  (dividend % divisor + divisor) % divisor;
 
 // Canvas measures
-export const COL = 10;
-export const ROW = 22;
-export const SQ = 20;
+const COL = 10;
+const ROW = 22;
+const SQ = 20;
 
 const colors = [
     [0, 0, 10, 20],  // empty 
@@ -18,7 +18,14 @@ const colors = [
     [192, 44, 85, 100]  // I-tetromino 
 ]
 
-export const getColor = (pick:number) => {
+const getColor = (pick:number) => {
     return colors[pick];
 }
 
+export {
+    getColor,
+    COL,
+    ROW,
+    SQ,
+    mod
+}
