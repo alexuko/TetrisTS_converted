@@ -1,4 +1,5 @@
 import {gameStatus} from '../app'
+
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 export const ws = new WebSocket("ws://localhost:8080");
 
@@ -24,6 +25,8 @@ ws.addEventListener("message", (msgRecv) => {
     return;
   }
 });
+
+
 
 ws.addEventListener("close", () => {
   console.log("desconnected from the server");

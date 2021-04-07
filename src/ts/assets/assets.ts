@@ -22,6 +22,8 @@ const getColor = (pick:number) => {
     return colors[pick];
 }
 
+
+
 export {
     getColor,
     COL,

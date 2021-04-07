@@ -3,9 +3,11 @@
 html {
     box-sizing: border-box;
     font-size: 62.5%; // 10px / 16px = 62.5% => 1rem = 10px  
-    min-height: 100vh;
     font-family: 'Quicksand', sans-serif;
+    min-height: 100%;
+
     // font-family: 'Yusei Magic', sans-serif;
+    position: relative;
 }
 
 *,
@@ -24,17 +26,17 @@ html {
 
 body    {
     background: linear-gradient(hsl(209, 59%, 31%) 0%, hsl(209, 96%, 9%) 50%, hsl(209, 96%, 12%) 100%);
-    padding: 1rem;
-    position: relative;
+    // padding: 1rem;
 }
 
 .backdrop{
     position: absolute;
     top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    height: 100%;
-    background-color: rgba(17, 16, 16, 0.85);
+    width: 100vw;
+    background-color: rgba(17, 16, 16, 0.90);
     display: flex;
     justify-content: center;
     align-items: center;       
@@ -200,8 +202,9 @@ input[type=submit]{
 }
 
 .display, 
-.best_players{
-    // display: block;
+.ranked-player{
+    display: flex;
+    justify-content: center;
     padding: .2rem 1rem;
     text-align: center;
     border-radius: 0 0 7px 7px ;
@@ -213,6 +216,7 @@ input[type=submit]{
 .high_scores{
     color: #fff;
     text-align: center;
+    font-weight: bold;
     
 }
 .high_scores .tag{
@@ -221,17 +225,22 @@ input[type=submit]{
     text-transform: uppercase;
 }
 
-.topnotch :not(:last-child){
-    margin-bottom: .5rem;
+.best-players-list {
+    list-style: none;
 }
-.best_players{
+.best-players-list :not(:last-child){
+    margin-bottom: .5rem;
+    list-style: none;
+}
+
+.ranked-player{
     display: flex;
 }
 .best{
     margin-right: auto;
 }
 
-.top_scores{
+.top_score{
     color: greenyellow;
     text-align: right;
     margin-left: 2.5rem;

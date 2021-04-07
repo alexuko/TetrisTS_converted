@@ -18,17 +18,15 @@ wss.on("connection", (ws, req) => {
     console.log(`Message from Client.`)
 
     // wss.send(`your message was received: ${clientMsg}`)
+    
     wss.clients.forEach((client) => {
-      //broadcast message to every client including itself
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(clientMsg);
-      }
       //broadcast message to every client except the one who sent the msg
-      // if (client !== ws && client.readyState === WebSocket.OPEN) {
-      //   client.send(clientMsg);
-      // }
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(clientMsg);
+        }
+        
+      });
     });
-  });
 
   // if a client closes session
   ws.on("close", () => {

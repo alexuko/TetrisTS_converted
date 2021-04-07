@@ -6,7 +6,7 @@ import Records from "./classes/records";
 import Piece from "./classes/piece";
 import * as tests from "./assets/SRS_offsets";
 import * as clientServer from "./server/client-server";
-
+import * as localStorage from './server/localStorage';
 
 let score: number,
   player: string,
@@ -19,25 +19,18 @@ let score: number,
   lockedPiece: boolean,
   records: Records,
   nextPiece: Piece | null = null,
-  gamePaused:boolean,
+  gamePaused: boolean,
   gameOver = true,
   spinPoints = 0,
   start = Date.now(),
-  sendToServer:NodeJS.Timeout;
-const empty = 0; 
-
-const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTMLInputElement>;
-const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
-const backdrop = document.querySelector(".backdrop")! as HTMLElement;
-const nextPieceCanvas = document.querySelector("canvas#nextPiece") as HTMLCanvasElement;
-const NPctx = nextPieceCanvas.getContext("2d")! as CanvasRenderingContext2D;
-
-//Gameboard Canvas
-const canvas = document.querySelector("canvas#tetris") as HTMLCanvasElement;
-const GBctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-canvas.width = COL * SQ;
-canvas.height = ROW * SQ;
-
+  sendToServer: NodeJS.Timeout,
+  nextPieceCanvas:HTMLCanvasElement,
+  NPctx:CanvasRenderingContext2D,
+  GBcanvas:HTMLCanvasElement,
+  GBctx:CanvasRenderingContext2D,
+  opponents: any = [];
+  
+const empty = 0;
 // Tuple use to represent  a pair of a string and a number (in that order ONLY)
 type Path = [string, number];
 //String Literal Type so not other string than the ones within Pathway will be accepted
@@ -45,10 +38,14 @@ type Pathway = "up" | "down" | "left" | "right" | "rotate";
 /**
  * State of the game
  * This data will be send to the server
- */ 
-export let gameStatus:any = { }
+ */
+export let gameStatus: any = {};
 
-let opponents:any = [];
+const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTMLInputElement>;
+const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
+const backdrop = document.querySelector(".backdrop")! as HTMLElement;
+
+
 
 const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
 
@@ -97,7 +94,15 @@ const startGame = (e: any) => {
 };
 
 const init = (name: string, selectedLevel: number) => {
-  // clientServer.startClientConnection();
+  //NextPiece Canvas 
+  nextPieceCanvas = document.querySelector("canvas#nextPiece") as HTMLCanvasElement;
+  NPctx = nextPieceCanvas.getContext("2d")! as CanvasRenderingContext2D;
+  //Gameboard Canvas
+  GBcanvas = document.querySelector("canvas#tetris") as HTMLCanvasElement;
+  GBctx = GBcanvas.getContext("2d") as CanvasRenderingContext2D;
+  GBcanvas.width = COL * SQ;
+  GBcanvas.height = ROW * SQ;
+  //
   let GB = new Gameboard(ROW, COL);
   gameBoard = GB.createGameBoard();
   brush = new Brush(SQ);
@@ -113,13 +118,15 @@ const init = (name: string, selectedLevel: number) => {
   level = records.level;
   player = records.player;
   speed = selectedLevel;
+  //update high scores table
+  // localStorage.updateScoreTable();
   //initialize game status
   gameStatus.piece = piece;
   gameStatus.records = records;
   gameStatus.gameboard = gameBoard;
   startSendingData();
   update();
-  drawOpponents();
+  // drawOpponents();
 };
 
 const moveTowards = (dir: Pathway): Path => {
@@ -171,35 +178,58 @@ const eraseGameBoard = (
 
 const drawPiece = (ctx: any, currentPiece: Piece) => {
   try {
+    // let count = 0;
     currentPiece.activeTetrominoe.forEach((row: number[], rIndex: number) => {
-      // console.log(this._activeTetrominoe[rIndex])
       row.forEach((col: number, cIndex: number) => {
-        // console.log(this._activeTetrominoe[rIndex][cIndex])
+                     
+        //if there is a "NUMBER" in the currentPiece matrix
         if (currentPiece.activeTetrominoe[rIndex][cIndex]) {
-          //if there is a "1" in the currentPiece matrix
-          // console.log(gameBoard[this.y+rIndex][this.x+cIndex])
-          if (
-            gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] !==
-            empty
-          ) {
-            //move the position of the currentPiece 1 space up, it does not draw it on top of previous
-            gameOver = true;
-            alert("gameover");
-            return; // so this does not overdraw the previous currentPiece
+          //check if coordinates on gameboard are not empty
+          //and if there is a piece or piece spawned over the limit then game is over
+          if (gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] !== empty || 
+            gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] === undefined) 
+            {
+              // count++;
+              // console.log(count);
+              if(!gameOver){
+                gameIsOver();        
+              }
+              
+            }
+
+          //draw a square even if the piece is out of bounds. This is just for styling 
+            brush.drawSquare(ctx, currentPiece.x + cIndex, currentPiece.y + rIndex, currentPiece.color );
           }
-          brush.drawSquare(
-            ctx,
-            currentPiece.x + cIndex,
-            currentPiece.y + rIndex,
-            currentPiece.color
-          ); //draw a square
-        }
+          //get off the loop    
+          if (gameOver === true) return;      
       });
+
     });
   } catch (e) {
-    console.error("error drawing the currentPiece: " + e);
+    // console.error("error drawing the currentPiece: " + e);
+    gameIsOver();
+    return;
   }
 };
+
+const gameIsOver = () => {
+    //set the gameover flag to true
+    gameOver = true;
+    // alert("GAME OVER !");
+    //save records in the local storage    
+    const res = localStorage.saveToLocalStorage()!;
+    if (res === 1) localStorage.compareScores();
+    
+    //update UI for the records
+    // localStorage.updateScoreTable();
+    //*****************************/
+    //show to the player that the game is over
+    //display the backdrop menu again
+    backdrop.style.display = 'flex';            
+    // so this does not overdraw the previous currentPiece
+    
+}
+
 
 const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
   //iterate through current currentPiece
@@ -768,3 +798,5 @@ const keyControl = (e: any) => {
 playBtn.addEventListener("click", startGame);
 pauseButton.addEventListener('click', pauseGame);
 ["keydown", "keyup"].forEach((e) => window.addEventListener(e, keyControl));
+
+
