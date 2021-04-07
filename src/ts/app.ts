@@ -218,10 +218,13 @@ const gameIsOver = () => {
     // alert("GAME OVER !");
     //save records in the local storage    
     const res = localStorage.saveToLocalStorage()!;
-    if (res === 1) localStorage.compareScores();
-    
+    let theScores:any[] = [];
+    if (res === 1) {
+       theScores = localStorage.compareScores();
+    }
+    // console.log(theScores)
     //update UI for the records
-    // localStorage.updateScoreTable();
+    localStorage.updateScoreTable(theScores);
     //*****************************/
     //show to the player that the game is over
     //display the backdrop menu again

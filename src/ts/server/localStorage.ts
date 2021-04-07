@@ -20,18 +20,18 @@ const saveToLocalStorage = () => {
         //get the values of the key (name and score)
         const newID = uuid()
         myStorage.setItem(newID, value2Bstored);
-        console.log(`Same connection, new record: player:${player}, score:${score}`)        
+        // console.log(`Same connection, new record: player:${player}, score:${score}`)        
       }else{
         //is not in the list, then its a new record or list is empty
         if(myStorage.length < 1){
           // first record
           myStorage.setItem(clientID, value2Bstored);
-          console.log(`First record saved: player:${player}, score:${score}`)
-          return 0;      
+          // console.log(`First record saved: player:${player}, score:${score}`)
+          // return 0;      
         }        
         
         myStorage.setItem(clientID, value2Bstored);
-        console.log(`Record saved: player:${player}, score:${score}`)
+        // console.log(`Record saved: player:${player}, score:${score}`)
       }
       return 1
     
@@ -50,52 +50,58 @@ const compareScores = () => {
     for(let i=0; i < storage.length; i++){
       arr.push(storage[i])
     }
-    //get the score value and compare it 
-    arr.forEach((el,idx) => {
-      let name:any = Array.from(el[1].split(','))[0];
-      let score:any = Array.from(el[1].split(','))[1];
-          score = parseInt(score);
-          console.log(score);
-          // de aqui en adelante hay que darle.
-    
-    })
+    // check if there's only one value on the array
+    if ( arr.length <= 1 ) return arr;
 
+    //get the score value and compare it 
+    for (let x = 0; x < arr.length; x++) {
+      let min = x;
+      // de aqui en adelante hay que darle.
+      for (let y = x; y < arr.length; y++) {
+        let currScore: any = Array.from(arr[min][1].split(","))[1];
+        currScore = parseInt(currScore);
+        // console.log(currScore);
+        let nextScore: any = Array.from(arr[y][1].split(","))[1];
+        nextScore = parseInt(nextScore);
+
+        if (currScore < nextScore) {
+          min = y;
+        }
+      }
+      //swap values
+      // console.log('swap')
+      let temp = arr[x];
+        arr[x] = arr[min];
+      arr[min] = temp;
+      
+
+    }
+    // console.log('completed')
+    return arr;
   }
 
   
-  const updateScoreTable = ()=> {
-    //get the storage 
+  const updateScoreTable = (scoreTable:any[])=> {
     try {
-      if(window.localStorage.length >= 1){
-        let storage = Object.entries(window.localStorage);
-        //get the UI fields to update
-        
+      //get the table 
+      if(scoreTable.length > 0){
+        //get all the HTML elements that we are gonna edit. NAME & SCORE        
         const names = document.querySelectorAll('.ply-name')!;
         const scores = document.querySelectorAll('.top_score')!;
-        console.log(names.length)
-        //names
-        // debugger;
+        
         scores.forEach((score,i) => {
-          let storagePosition = storage[i];
-
-          if(storagePosition === null || storagePosition === undefined){
-            return;            
-          } 
-          let playerScore = JSON.parse(storagePosition[1])._score;
-          console.log(playerScore)      
-          score.textContent = playerScore.toString();
+          if(scoreTable[i] === null || scoreTable[i] === undefined) return;
+          
+          let arrScore:any = Array.from(scoreTable[i][1].split(","))[1];          
+          score.textContent = arrScore;
         })
         
         names.forEach((name,i) => {
-          let storagePosition = storage[i]; 
-          if(storagePosition === null || storagePosition === undefined){
-            return;            
-          }
-          let player = JSON.parse(storagePosition[1])._player;   
-          console.log(player)
-          name.textContent = `${player}`;
+          if(scoreTable[i] === null || scoreTable[i] === undefined) return;
+          let arrName:any = Array.from(scoreTable[i][1].split(","))[0];
+          name.textContent = arrName.toUpperCase();
         })
-        //scores
+        
       }  
       
     } catch (error) {
