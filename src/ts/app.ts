@@ -19,7 +19,7 @@ let score: number,
   lockedPiece: boolean,
   records: Records,
   nextPiece: Piece | null = null,
-  gamePaused: boolean,
+  isGamePaused: boolean,
   gameOver = true,
   spinPoints = 0,
   start = Date.now(),
@@ -44,9 +44,6 @@ export let gameStatus: any = {};
 const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTMLInputElement>;
 const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
 const backdrop = document.querySelector(".backdrop")! as HTMLElement;
-
-
-
 const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
 
 const drawOpponents = () => {
@@ -56,10 +53,11 @@ const drawOpponents = () => {
 
 const pauseGame = () => {  
   //change status of the game with event listener
-  gamePaused = !gamePaused;
+  isGamePaused = !isGamePaused;
+  // console.log(isGamePaused)
   //change button dialog
   let buttonState = '';
-  if(gamePaused){//if game on paused   
+  if(isGamePaused){//if game on paused   
     pauseButton.classList.remove('btn-pause')
     buttonState = 'Play';
     pauseButton.classList.add('btn-play')
@@ -81,15 +79,26 @@ const pauseGame = () => {
 const startGame = (e: any) => {
   e.preventDefault();
   const arr = Array.from(formValues).map((el) => el.value);
-  const playerName: string = !arr[0] ? "unknown" : arr[0];
-  const playerLevel: number = parseInt(arr[1]);
-  speed = playerLevel;
+  player = !arr[0] ? "unknown" : arr[0];
+  level = parseInt(arr[1]);
+  speed = level;
   console.log(
-    `playerName: ${playerName} \nplayerLevel: ${playerLevel} \nspeed: ${speed} `
+    `playerName: ${player} \nplayerLevel: ${level} \nspeed: ${speed} `
   );
   //   console.log(speed)
   backdrop.style.display = "none";
-  init(playerName, speed);  
+  init(player, speed);  
+  // e.preventDefault();
+  // const arr = Array.from(formValues).map((el) => el.value);
+  // const playerName: string = !arr[0] ? "unknown" : arr[0];
+  // const playerLevel: number = parseInt(arr[1]);
+  // speed = playerLevel;
+  // console.log(
+  //   `playerName: ${playerName} \nplayerLevel: ${playerLevel} \nspeed: ${speed} `
+  // );
+  // //   console.log(speed)
+  // backdrop.style.display = "none";
+  // init(playerName, speed);  
   
 };
 
@@ -115,15 +124,13 @@ const init = (name: string, selectedLevel: number) => {
   getNextPiece();
   score = records.score;
   lines = records.lines;
-  level = records.level;
-  player = records.player;
-  speed = selectedLevel;
-  //update high scores table
-  // localStorage.updateScoreTable();
+  level = records.level;  
   //initialize game status
   gameStatus.piece = piece;
   gameStatus.records = records;
   gameStatus.gameboard = gameBoard;
+  //update high scores table
+  localStorage.updateScoresTable();
   startSendingData();
   update();
   // drawOpponents();
@@ -213,26 +220,16 @@ const drawPiece = (ctx: any, currentPiece: Piece) => {
 };
 
 const gameIsOver = () => {
-    //set the gameover flag to true
-    gameOver = true;
-    // alert("GAME OVER !");
-    //save records in the local storage    
-    const res = localStorage.saveToLocalStorage()!;
-    let theScores:any[] = [];
-    if (res === 1) {
-       theScores = localStorage.compareScores();
-    }
-    // console.log(theScores)
-    //update UI for the records
-    localStorage.updateScoreTable(theScores);
-    //*****************************/
-    //show to the player that the game is over
-    //display the backdrop menu again
-    backdrop.style.display = 'flex';            
-    // so this does not overdraw the previous currentPiece
-    
-}
-
+  //set the gameover flag to true
+  gameOver = true;
+  // alert("GAME OVER !");
+  //save records in the local storage
+  localStorage.saveToLocalStorage();
+  localStorage.updateScoresTable();
+  //*****************************/
+  //show to the player that the game is over
+  backdrop.style.display = "flex";
+};  
 
 const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
   //iterate through current currentPiece
@@ -745,10 +742,11 @@ const startSendingData = () => {
     sendToServer = setInterval(() => clientServer.sendGameStatus(gameStatus), 2000);
   // clearInterval(sendToServer);
 }
+
 const stopSendingData = () => clearInterval(sendToServer);
 
 const update = () => {
-  if(!gamePaused){
+  if(!isGamePaused){
     if (!gameOver) {
       let now = Date.now();
       let timeCounter = now - start;
@@ -771,7 +769,7 @@ const update = () => {
 
 const keyControl = (e: any) => {
   // console.log(e)
-  if (gameOver || gamePaused) return;
+  if (gameOver || isGamePaused) return;
   
   else {
     if (e.type === "keydown") {

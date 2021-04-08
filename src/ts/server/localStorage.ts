@@ -46,11 +46,11 @@ const compareScores = () => {
     console.log('comparing...')
     let storage = Object.entries(window.localStorage);
     let arr:any[] = [];
-
+    
     for(let i=0; i < storage.length; i++){
       arr.push(storage[i])
     }
-    // check if there's only one value on the array
+    // check if there's more than  one value on the array, so we have something to compare
     if ( arr.length <= 1 ) return arr;
 
     //get the score value and compare it 
@@ -81,7 +81,7 @@ const compareScores = () => {
   }
 
   
-  const updateScoreTable = (scoreTable:any[])=> {
+  const setScoreTable = (scoreTable:any[])=> {
     try {
       //get the table 
       if(scoreTable.length > 0){
@@ -111,9 +111,17 @@ const compareScores = () => {
 
       
   }
+
+  const updateScoresTable = () => {
+    const theScores = compareScores();
+    //update UI for the records
+    setScoreTable(theScores);
+    //display the backdrop menu again
+       
+}
+
   
   export {
-      saveToLocalStorage,
-      compareScores,    
-      updateScoreTable  
+      saveToLocalStorage,        
+      updateScoresTable  
   }
