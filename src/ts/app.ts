@@ -27,8 +27,8 @@ let score: number,
   nextPieceCanvas:HTMLCanvasElement,
   NPctx:CanvasRenderingContext2D,
   GBcanvas:HTMLCanvasElement,
-  GBctx:CanvasRenderingContext2D,
-  opponents: any = [];
+  GBctx:CanvasRenderingContext2D;
+  
   
 const empty = 0;
 // Tuple use to represent  a pair of a string and a number (in that order ONLY)
@@ -46,10 +46,40 @@ const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
 const backdrop = document.querySelector(".backdrop")! as HTMLElement;
 const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
 
-const drawOpponents = () => {
-  opponents = document.querySelectorAll('.contender')!;
-  console.log(opponents);
+
+let contenders:any = [];
+const drawOpponents = (opponent?:any) => {
+
+  //check if the opponent already exist
+  const contenderIndex = contenders.indexOf(opponent.clientID)
+  let rivalCanvas:HTMLCanvasElement;
+  let ctxRival:CanvasRenderingContext2D;
+  //new contender to be added
+  if(contenderIndex === -1){
+    contenders.push(opponent.clientID)
+    console.log(opponent)
+    const rivals = document.querySelector(`.contenders`)!;
+    rivalCanvas = document.createElement("canvas");
+    rivalCanvas.id = opponent.clientID;
+    rivalCanvas.className = 'opponent';
+    rivalCanvas.width = COL * (SQ / 2);
+    rivalCanvas.height = ROW * (SQ / 2);
+    rivals.appendChild(rivalCanvas);    
+    ctxRival = rivalCanvas.getContext("2d") as CanvasRenderingContext2D;
+    ctxRival.scale(0.5,0.5)
+    eraseGameBoard(ctxRival,ROW,COL);
+    drawGameBoard(ctxRival,ROW,COL);
+    drawPiece(ctxRival,opponent.piece)
+  }
+  else{
+    console.log('player already exists')
+    //repace the node and update the new
+    
+  }
+  
+  
 }
+
 
 const pauseGame = () => {  
   //change status of the game with event listener
@@ -85,20 +115,8 @@ const startGame = (e: any) => {
   console.log(
     `playerName: ${player} \nplayerLevel: ${level} \nspeed: ${speed} `
   );
-  //   console.log(speed)
   backdrop.style.display = "none";
   init(player, speed);  
-  // e.preventDefault();
-  // const arr = Array.from(formValues).map((el) => el.value);
-  // const playerName: string = !arr[0] ? "unknown" : arr[0];
-  // const playerLevel: number = parseInt(arr[1]);
-  // speed = playerLevel;
-  // console.log(
-  //   `playerName: ${playerName} \nplayerLevel: ${playerLevel} \nspeed: ${speed} `
-  // );
-  // //   console.log(speed)
-  // backdrop.style.display = "none";
-  // init(playerName, speed);  
   
 };
 
@@ -133,7 +151,8 @@ const init = (name: string, selectedLevel: number) => {
   localStorage.updateScoresTable();
   startSendingData();
   update();
-  // drawOpponents();
+  
+  
 };
 
 const moveTowards = (dir: Pathway): Path => {
@@ -287,9 +306,8 @@ const checkFullRows = () => {
   if (fullRows > 0) {
     lines += fullRows;
     spinPoints = spinPoints <= 0 ? 1 : spinPoints;
-    fullRows < 4
-      ? (score += fullRows * 100 * spinPoints)
-      : (score += fullRows * 200 * spinPoints);
+    fullRows < 4  ? (score += fullRows * 10 * spinPoints)
+                  : (score += fullRows * 20 * spinPoints);
     console.log(`lines:${fullRows}, score:${score}, spinPoints:${spinPoints}`);
     records.setLines(lines);
     records.setScore(score);
@@ -739,7 +757,10 @@ const getNextPiece = () => {
 };
 
 const startSendingData = () => {
-    sendToServer = setInterval(() => clientServer.sendGameStatus(gameStatus), 2000);
+    sendToServer = setInterval(() => {
+    
+      clientServer.sendGameStatus(gameStatus)
+    }, 2000);
   // clearInterval(sendToServer);
 }
 
@@ -755,6 +776,7 @@ const update = () => {
       
       if (timeCounter > sec) {
         moveDown();// clientServer.sendGameStatus(gameStatus);
+        drawOpponents(gameStatus);
         start = Date.now();
       }
       // eslint-disable-next-line no-unused-vars

@@ -40,8 +40,8 @@ body    {
     display: flex;
     justify-content: center;
     align-items: center;       
+    display: none;
     display: flex;
-    // display: none;
 }
 .menu{
     background-color: rgb(179, 179, 179);
@@ -253,10 +253,19 @@ input[type=submit]{
     
 }
 
-canvas#tetris  {
+
+canvas#tetris,
+canvas.opponent  {
     background-color: hsla(0, 0%, 6%, 1.0);
-    border: 10px solid rgb(124, 123, 123);
 }
+
+canvas#tetris  {
+    border: 6px solid rgb(124, 123, 123);
+}
+canvas.opponent  {
+    border: 3px solid rgb(124, 123, 123);
+}
+
 canvas#nextPiece  {
     background: linear-gradient(rgba(248, 248, 248, 0.1) 0%, hsla(0, 0%, 10%, 0.2) 20% ,hsla(0, 0%, 7%, 0.226) 50%, transparent 100%);
     border: thick double hsla(0, 0%, 100%, 0.19);
