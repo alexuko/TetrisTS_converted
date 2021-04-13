@@ -44,50 +44,50 @@ export let gameStatus: any = {};
 const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTMLInputElement>;
 const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
 const backdrop = document.querySelector(".backdrop")! as HTMLElement;
-const pauseButton = document.querySelector('#play-pause')! as HTMLButtonElement;
+const pauseButton = document.querySelector('#play-pause-btn')! as HTMLButtonElement;
 
 
-let contenders:any = [];
-const drawOpponents = (opponent?:any) => {
+// export let contenders:any = [];
+// const drawOpponents = (opponent?:any) => {
 
-  //check if the opponent already exist
-  const contenderIndex = contenders.indexOf(opponent.clientID)
-  let rivalCanvas:HTMLCanvasElement;
-  let ctxRival:CanvasRenderingContext2D;
-  //new contender to be added
-  if(contenderIndex === -1){
-    contenders.push(opponent.clientID)
-    console.log(opponent)
-    const rivals = document.querySelector(`.contenders`)!;
-    rivalCanvas = document.createElement("canvas");
-    rivalCanvas.id = opponent.clientID;
-    rivalCanvas.className = 'opponent';
-    rivalCanvas.width = COL * (SQ / 2);
-    rivalCanvas.height = ROW * (SQ / 2);
-    rivals.appendChild(rivalCanvas);    
-    ctxRival = rivalCanvas.getContext("2d") as CanvasRenderingContext2D;
-    ctxRival.scale(0.5,0.5)
-    eraseGameBoard(ctxRival,ROW,COL);
-    drawGameBoard(ctxRival,ROW,COL);
-    drawPiece(ctxRival,opponent.piece)
-  }
-  else{
-    console.log('player already exists')
-    //repace the node and update the new
+//   //check if the opponent already exist
+//   const contenderIndex = contenders.indexOf(opponent.clientID)
+//   let rivalCanvas:HTMLCanvasElement;
+//   let ctxRival:CanvasRenderingContext2D;
+//   //new contender to be added
+//   if(contenderIndex === -1){
+//     contenders.push(opponent.clientID)
+//     console.log(opponent)
+//     const rivals = document.querySelector(`.contenders`)!;
+//     rivalCanvas = document.createElement("canvas");
+//     rivalCanvas.id = opponent.clientID;
+//     rivalCanvas.className = 'opponent';
+//     rivalCanvas.width = COL * (SQ / 2);
+//     rivalCanvas.height = ROW * (SQ / 2);
+//     rivals.appendChild(rivalCanvas);    
+//     ctxRival = rivalCanvas.getContext("2d") as CanvasRenderingContext2D;
+//     ctxRival.scale(0.5,0.5)
+//     eraseGameBoard(ctxRival,ROW,COL);
+//     drawGameBoard(ctxRival,ROW,COL);
+//     drawPiece(ctxRival,opponent.piece)
+//   }
+//   else{
+//     console.log('player already exists')
+//     //repace the node and update the new
     
-  }
-  
-  
-}
+//   }
+// }
 
 
 const pauseGame = () => {  
   //change status of the game with event listener
+  // console.log('pause button pressed')
   isGamePaused = !isGamePaused;
   // console.log(isGamePaused)
   //change button dialog
   let buttonState = '';
   if(isGamePaused){//if game on paused   
+    // console.log('game is paused')
     pauseButton.classList.remove('btn-pause')
     buttonState = 'Play';
     pauseButton.classList.add('btn-play')
@@ -95,6 +95,7 @@ const pauseGame = () => {
     stopSendingData();
   }  
   else{ //if Playing
+    console.log('game is on')
     pauseButton.classList.remove('btn-play')
     buttonState = 'Pause';
     pauseButton.classList.add('btn-pause')
@@ -112,9 +113,7 @@ const startGame = (e: any) => {
   player = !arr[0] ? "unknown" : arr[0];
   level = parseInt(arr[1]);
   speed = level;
-  console.log(
-    `playerName: ${player} \nplayerLevel: ${level} \nspeed: ${speed} `
-  );
+  // console.log(`playerName: ${player} \nplayerLevel: ${level} \nspeed: ${speed} `);
   backdrop.style.display = "none";
   init(player, speed);  
   
@@ -758,17 +757,18 @@ const getNextPiece = () => {
 
 const startSendingData = () => {
     sendToServer = setInterval(() => {
-    
+      // console.log(`data sent`)    
       clientServer.sendGameStatus(gameStatus)
-    }, 2000);
+      // console.log(gameStatus)
+    }, 1000);
   // clearInterval(sendToServer);
 }
 
 const stopSendingData = () => clearInterval(sendToServer);
 
 const update = () => {
-  if(!isGamePaused){
-    if (!gameOver) {
+
+  if(!isGamePaused && !gameOver){    
       let now = Date.now();
       let timeCounter = now - start;
   
@@ -776,16 +776,16 @@ const update = () => {
       
       if (timeCounter > sec) {
         moveDown();// clientServer.sendGameStatus(gameStatus);
-        drawOpponents(gameStatus);
+        // drawOpponents(gameStatus);
         start = Date.now();
       }
       // eslint-disable-next-line no-unused-vars
       requestAnimationFrame(update);
-    }
+    
+    } 
     else{
       stopSendingData();
     }
-  } 
 
 };
 

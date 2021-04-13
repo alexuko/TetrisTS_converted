@@ -40,9 +40,10 @@ body    {
     display: flex;
     justify-content: center;
     align-items: center;       
-    display: none;
+    // display: none;
     display: flex;
 }
+
 .menu{
     background-color: rgb(179, 179, 179);
     background: linear-gradient(hsl(209, 59%, 31%) 0%, hsl(209, 96%, 9%) 50%, hsl(209, 96%, 12%) 100%);
@@ -70,7 +71,7 @@ body    {
     text-align: center;
     letter-spacing: 5px;
 }
-.game-fields{
+.game-form{
     // background-color: purple;
     display: flex;
     flex-direction: column;
@@ -95,10 +96,8 @@ input[type=text]:placeholder-shown {
 }
 
 input[type=text],
-input[type=number]
-{   
-    width: 100%;
-    
+input[type=number]{   
+    width: 100%;    
     padding: .5rem 1rem;
     text-align: center;
     border-radius: 0 0 7px 7px ;
@@ -108,8 +107,7 @@ input[type=number]
     font-weight: 600;
 }
 
-input[type=number]
-{    
+input[type=number]{    
     width: 75px ;
 }
 
@@ -133,18 +131,15 @@ input[type=submit]{
     text-transform: uppercase;
     background-color: hsla(192, 44, 85, 100);
     border-radius: 5px;
-    border: solid 2px hsla(192, 44, 75, 100);    
-
-
-
+    border: solid 2px hsla(192, 44, 75, 100);  
 }
 
-.controls{    
+.play-pause-control{    
     display: flex;
     justify-content: center;    
 }
 
-#play-pause{
+#play-pause-btn{
     font-size: 1.5rem;
 }
 
@@ -161,31 +156,27 @@ input[type=submit]{
 
 .game{
     display: grid;
-    grid-template-columns: repeat(3, minmax(10rem, min-content)) ;
-    grid-template-rows: repeat(2, minmax(min-content, 45vh));
-    gap: 4rem;
+    grid-template-columns: 1fr repeat(3, minmax(max-content, min-content)) 1fr;
+    grid-template-rows: 1fr minmax(max-content, auto)  1fr;
+    gap: 10rem;
     justify-content: center;
-
-
-
 }
 
 
+// ******************* RECORDS  *******************
 .records{
     // background-color: orangered;
-    grid-row: 1 / -1;
-    grid-column: 1 / span 1;
+    grid-row: 2 / span 1;
+    grid-column: 2 / span 1;
     
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    align-items: center;
     
 }
 
 .details, .high_scores{
     padding: 1rem;
-    // background-color: lightblue;
     border: thick double hsla(0, 0%, 100%, 0.19);
     border-radius: 5px;
     
@@ -198,7 +189,7 @@ input[type=submit]{
     text-align: right;
     text-transform: uppercase;
     font-weight: lighter;
-
+    
 }
 
 .display, 
@@ -246,55 +237,69 @@ input[type=submit]{
     margin-left: 2.5rem;
 }
 
+// ******************* PLAYGROUND  *******************
 .game-area-box{
-    grid-row: 1 / -1;
-    grid-column: 2 / span 1;
+    // background-color: #ed7e06;
+    grid-row: 2 / span 1;
+    grid-column: 3 / span 1;
     margin: auto 0;
     
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    
+}
+.game_hint{
+    // background-color: blueviolet;
+    align-items: center;
+    color: #fff;    
+    margin: 3vh 0;
 }
 
+.next_piece .tag{
+    text-align: center;
+    margin: 1rem auto;
+    font-size: large;
+    text-transform: capitalize;
+    -webkit-text-emphasis-style: open;
+            text-emphasis-style: open;
 
-canvas#tetris,
-canvas.opponent  {
-    background-color: hsla(0, 0%, 6%, 1.0);
-}
-
-canvas#tetris  {
-    border: 6px solid rgb(124, 123, 123);
-}
-canvas.opponent  {
-    border: 3px solid rgb(124, 123, 123);
 }
 
 canvas#nextPiece  {
     background: linear-gradient(rgba(248, 248, 248, 0.1) 0%, hsla(0, 0%, 10%, 0.2) 20% ,hsla(0, 0%, 7%, 0.226) 50%, transparent 100%);
     border: thick double hsla(0, 0%, 100%, 0.19);
     padding: 2rem;
-    // border: 2px solid #fff;
 }
 
-.game_hints{
-    // background-color: lightblue;
-    grid-row: 1 / -1;
-    grid-column: 3 / span 1;
+// ******************* PLAYGROUND - GAME  *******************
 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    color: #fff;
+canvas#tetris  {
+    border: 6px solid rgb(124, 123, 123);
+    margin: 2rem auto;
+}
+
+canvas#tetris,
+canvas.opponent  {
+    background-color: hsla(0, 0%, 6%, 1.0);
+}
+
+canvas.opponent  {
+    border: 3px solid rgb(124, 123, 123);
+}
+
+
+
+// ******************* CONTENDERES  *******************
+
+.contenders{
+    grid-row: 2 / span 1;
+    grid-column: 4 / -1;
     
-    margin: 5vh 0;
-}
-
-.next_piece .tag{
-    text-align: center;
-    margin: 1rem auto;
-
-//  width: 5rem;
-}
-
-.player2{
-    display: none;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    
 }
 

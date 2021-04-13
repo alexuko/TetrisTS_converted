@@ -21,9 +21,12 @@ wss.on("connection", (ws, req) => {
     
     wss.clients.forEach((client) => {
       //broadcast message to every client except the one who sent the msg
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
+        if (client.readyState === WebSocket.OPEN) {
           client.send(clientMsg);
         }
+        // if (client !== ws && client.readyState === WebSocket.OPEN) {
+        //   client.send(clientMsg);
+        // }
         
       });
     });

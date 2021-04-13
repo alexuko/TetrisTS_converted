@@ -43,7 +43,7 @@ const saveToLocalStorage = () => {
   }
   
 const compareScores = () => {
-    console.log('comparing...')
+    // console.log('comparing...')
     let storage = Object.entries(window.localStorage);
     let arr:any[] = [];
     
