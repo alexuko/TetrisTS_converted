@@ -314,11 +314,17 @@ canvas#tetris  {
         margin: 1rem 0;    
     }
     &__records{
-        color: rgb(173, 173, 173);
+        color: rgb(173, 173, 173);        
     }
 
-    &__records > p > strong{
+    .record{
+       display: flex;
+       justify-content: space-between;
+       
+    }
+    .record strong{
         color: rgb(35, 255, 46);
+        margin-left: 2rem;
     }
 }
 

@@ -35,10 +35,7 @@ const empty = 0;
 type Path = [string, number];
 //String Literal Type so not other string than the ones within Pathway will be accepted
 type Pathway = "up" | "down" | "left" | "right" | "rotate";
-/**
- * State of the game
- * This data will be send to the server
- */
+
 export let gameStatus: any = {};
 
 const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTMLInputElement>;
@@ -96,20 +93,25 @@ const init = (name: string, selectedLevel: number) => {
   GBctx = GBcanvas.getContext("2d") as CanvasRenderingContext2D;
   GBcanvas.width = COL * SQ;
   GBcanvas.height = ROW * SQ;
-  //
+  
   let GB = new Gameboard(ROW, COL);
   gameBoard = GB.createGameBoard();
+  //testing
+  // gameBoard[21][1] = 1;  
+  // gameBoard[21][2] = 2;  
+  // gameBoard[21][3] = 3;  
+  // gameBoard[21][4] = 4;  
   brush = new Brush(SQ);
   gameOver = false;
   records = new Records(name, selectedLevel);
   records.setInitialUIvalues();
-  drawGameBoard(GBctx, ROW, COL);
+  drawGameBoard(gameBoard,GBctx, ROW, COL);
   piece = getRandomPiece();
-  drawPiece(GBctx, piece);
+  drawPiece(GBctx, piece,gameBoard);
   getNextPiece();
   score = records.score;
   lines = records.lines;
-  level = records.level;  
+  level = records.level;
   //initialize game status
   gameStatus.piece = piece;
   gameStatus.records = records;
@@ -133,13 +135,8 @@ const moveTowards = (dir: Pathway): Path => {
   return path;
 };
 
-const drawGameBoard = (
-  ctx: CanvasRenderingContext2D,
-  rows: number,
-  cols: number
-) => {
+const drawGameBoard = (gameBoard: number[][],ctx: CanvasRenderingContext2D,rows: number,cols: number) => {
   //iterate through all rows
-
   for (let r = 0; r < rows; r++) {
     //now iterate through each column from each row
     for (let c = 0; c < cols; c++) {
@@ -169,29 +166,30 @@ const eraseGameBoard = (
   }
 };
 
-const drawPiece = (ctx: any, currentPiece: Piece) => {
+const drawPiece = (ctx: any, currentPiece: any,gameBoard:number[][]) => {
+  console.log(currentPiece);
   try {
     // let count = 0;
     currentPiece.activeTetrominoe.forEach((row: number[], rIndex: number) => {
       row.forEach((col: number, cIndex: number) => {
                      
         //if there is a "NUMBER" in the currentPiece matrix
-        if (currentPiece.activeTetrominoe[rIndex][cIndex]) {
-          //check if coordinates on gameboard are not empty
-          //and if there is a piece or piece spawned over the limit then game is over
-          if (gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] !== empty || 
-            gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] === undefined) 
-            {
-              // count++;
-              // console.log(count);
-              if(!gameOver){
-                gameIsOver();        
+        if(gameBoard !== undefined){
+            if (currentPiece.activeTetrominoe[rIndex][cIndex]) {
+            //check if coordinates on gameboard are not empty
+            //and if there is a piece or piece spawned over the limit then game is over
+            if (gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] !== empty || 
+              gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] === undefined) 
+              {
+                if(!gameOver){
+                  gameIsOver(true);  
+                  //notify other players that game is over.
+                  //TODO      
+                }              
               }
-              
+            //draw a square even if the piece is out of bounds. This is just for styling 
+              brush.drawSquare(ctx, currentPiece.x + cIndex, currentPiece.y + rIndex, currentPiece.color );
             }
-
-          //draw a square even if the piece is out of bounds. This is just for styling 
-            brush.drawSquare(ctx, currentPiece.x + cIndex, currentPiece.y + rIndex, currentPiece.color );
           }
           //get off the loop    
           if (gameOver === true) return;      
@@ -199,20 +197,19 @@ const drawPiece = (ctx: any, currentPiece: Piece) => {
 
     });
   } catch (e) {
-    // console.error("error drawing the currentPiece: " + e);
-    gameIsOver();
-    return;
+    // debugger
+    console.log(`drawPiece() error: ${e}`)
+      return;
   }
 };
 
-const gameIsOver = () => {
+const gameIsOver = (isOver:boolean) => {
   //set the gameover flag to true
-  gameOver = true;
+  gameOver = isOver;
   // alert("GAME OVER !");
   //save records in the local storage
   localStorage.saveToLocalStorage();
   localStorage.updateScoresTable();
-  //*****************************/
   //show to the player that the game is over
   backdrop.style.display = "flex";
 };  
@@ -225,18 +222,9 @@ const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
         //if there is a "number in the tetrominoe matrix e.g. 1"
         if (currentPiece.activeTetrominoe[rIndex][cIndex]) {
           //first completly delete the square from the GB
-          brush.undrawSquare(
-            ctx,
-            currentPiece.x + cIndex,
-            currentPiece.y + rIndex
-          ); //draw a square
+          brush.undrawSquare(ctx,currentPiece.x + cIndex, currentPiece.y + rIndex ); //draw a square
           //this will draw a black square (available space) in the current position
-          brush.drawSquare(
-            ctx,
-            currentPiece.x + cIndex,
-            currentPiece.y + rIndex,
-            getColor(0)
-          ); //draw a square
+          brush.drawSquare(ctx, currentPiece.x + cIndex, currentPiece.y + rIndex, getColor(0)); //draw a square
         }
       });
     });
@@ -296,8 +284,7 @@ const setSpeed = (linesCompleted: number, level: number) => {
 };
 
 const pullRowsDown = (from: number) => {
-  // console.log(`pullRowsDown() ${from}`)
-  // iterate every row in the GB from bottom up
+// iterate every row in the GB from bottom up
   for (let r = from; r >= 0; r--) {
     for (let c = 0; c < COL; c++) {
       //if row has a preceding row then switch current row by the preceding one
@@ -334,14 +321,14 @@ const moveDown = () => {
   if (!collision(moveTowards("down"))) {
     erasePiece(GBctx, piece);
     piece.moveTo(moveTowards("down"));
-    drawPiece(GBctx, piece);
+    drawPiece(GBctx, piece,gameBoard);
   } else {
     merge();
     checkFullRows();
-    drawGameBoard(GBctx, ROW, COL);
+    drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
     piece = getRandomPiece();
-    drawPiece(GBctx, piece);
+    drawPiece(GBctx, piece, gameBoard);
     getNextPiece();
   }
 };
@@ -374,7 +361,7 @@ const moveRight = (rotateAction = false) => {
       //check if there is no collision and if there is not,
       erasePiece(GBctx, piece);
       piece.moveTo(moveTowards("right"));
-      drawPiece(GBctx, piece);
+      drawPiece(GBctx, piece, gameBoard);
     }
   } else {
     piece.moveTo(moveTowards("right"));
@@ -389,7 +376,7 @@ const moveLeft = (rotateAction = false) => {
       erasePiece(GBctx, piece);
       // if (!this.hitWall(DIRECTION.left)) {
       piece.moveTo(moveTowards("left"));
-      drawPiece(GBctx, piece);
+      drawPiece(GBctx, piece,gameBoard);
     }
   } else {
     piece.moveTo(moveTowards("left"));
@@ -425,7 +412,7 @@ const rotate = (clockwise: boolean, rotTimes: number = 0) => {
     if (collision(moveTowards("rotate"))) wallKick();
     // Now check that pieces do not overlap
     if (!piecesOverlapped()) {
-      drawPiece(GBctx, piece);
+      drawPiece(GBctx,piece,gameBoard);
       return;
     }
     //if pieces overlapped then
@@ -448,7 +435,7 @@ const rotate = (clockwise: boolean, rotTimes: number = 0) => {
     console.log(
       `FINAL position: ${piece.position}, X:${piece.x}, Y:${piece.y}`
     );
-    drawPiece(GBctx, piece);
+    drawPiece(GBctx, piece,gameBoard);
   } catch (e) {
     console.error(`There was an error roating the piece ${e}`);
   }
@@ -720,7 +707,7 @@ const getNextPiece = () => {
     nextPiece.x = 0;
     nextPiece.y = 0;
   }
-  drawPiece(NPctx, nextPiece);
+  drawPiece(NPctx, nextPiece, gameBoard);
 };
 
 const startSendingData = () => {
@@ -795,3 +782,24 @@ export {
   eraseGameBoard,
   drawPiece
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

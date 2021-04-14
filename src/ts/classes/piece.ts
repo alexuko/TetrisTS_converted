@@ -19,6 +19,8 @@ export default class Piece {
     this._activeTetrominoe = this.tetrominoe[this._position]; //tetrominow with current position
   }
 
+  
+
   public get color(){
       return this._color;
   }
@@ -96,4 +98,8 @@ export default class Piece {
     // returns either column or row
     return isRow ? row : col;
   }
+}
+//method created to sort out the problem with rendering piece for contender
+export const clonePiece = (piece:any) => {
+  return new Piece(piece._tetrominoe,piece._color,piece._number);  
 }

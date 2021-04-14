@@ -102,15 +102,24 @@
           <!-- rivals  -->
         <section class="contenders">
             <!-- TEMPLATE
-            <article class="contender ">
-                <h5 class="contender__name">contender-Name</h5>
-                <canvas class="contender__canvas" height="150" width="100" style="background-color: black;"></canvas>
-                <div class="contender__records">
-                    <p class="contender__records-score">score:   <strong>100</strong></p>
-                    <p class="contender__records-lines">lines:   <strong>1</strong></p>
-                    <p class="contender__records-status">status: <strong>playing</strong></p>
-                </div>
-            </article> 
+                <article id="${data.clientID}" class="contender">
+                    <h5 class="contender__name">${data.records._player}</h5>
+                    <canvas id="contender__canvas-${data.clientID}" class="contender__canvas" style="background-color: black;"></canvas>
+                    <div class="contender__records">
+                        <div class="record">
+                            <p class="contender__records-score">score:</p>
+                            <strong>${data.records._score}</strong>                        
+                        </div>
+                        <div class="record">
+                            <p class="contender__records-lines">lines:</p>
+                            <strong>${data.records._lines}</strong>
+                        </div>
+                        <div class="record">
+                            <p class="contender__records-status">status:</p>
+                            <strong>${test}</strong>
+                        </div>
+                    </div>
+                </article>       
             -->
 
         </section>
