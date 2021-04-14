@@ -1,8 +1,12 @@
+import { SQ, ROW, COL, getColor} from "../assets/assets";
 import {gameStatus} from '../app'
+import { drawGameBoard, eraseGameBoard, drawPiece } from '../app'
 
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 export const ws = new WebSocket("ws://localhost:8080");
 export let contenders:any = [];
+const contendersBox = document.querySelector('.contenders')!;
+
 
 ws.addEventListener("open", () => {
   console.log("Ready to rock you are connected");
@@ -23,10 +27,11 @@ ws.addEventListener("message", (msgRecv) => {
       const contenderID = contenderData.clientID;
       if(contenders.length !== 0){
         if(isContenderAlreadyPlaying(contenderID) === -1){
-          //contender is not playing yet, then add contender to the array of contenders
+          //contender is not playing yet
+          //add contender to the array 
           contenders.push(contenderData);
-          //add contender to the list of contender in the html contenders node
-          // TODO
+          //draw contenders and include the new contender
+          drawContenders(contenders);
         }
         else{
           //contender is already playing
@@ -36,7 +41,8 @@ ws.addEventListener("message", (msgRecv) => {
         
       }else{
         //first contender in the list
-         contenders.push(contenderData);         
+         contenders.push(contenderData);
+         drawContenders(contenders);         
        }
        console.log(contenders)
 
@@ -50,6 +56,69 @@ ws.addEventListener("message", (msgRecv) => {
 ws.addEventListener("close", () => {
   console.log("desconnected from the server");
 });
+
+const rivalTemplate = (data:any) => {
+  // console.log(data)
+  const test = 1;
+  const markup = `
+              <article id="${data.clientID}" class="contender">
+                  <h5 class="contender__name">${data.records._player}</h5>
+                  <canvas id="contender__canvas-${data.clientID}" class="contender__canvas" style="background-color: black;"></canvas>
+                  <div class="contender__records">
+                      <p class="contender__records-score">score:   <strong>${data.records._score}</strong></p>
+                      <p class="contender__records-lines">lines:   <strong>${data.records._lines}</strong></p>
+                      <p class="contender__records-status">status: <strong>${test}</strong></p>
+                  </div>
+              </article>   
+  `
+  contendersBox.insertAdjacentHTML('afterbegin', markup);
+  
+  // PROBABLY A NEW FUNCTION WOULD BE GREAT
+  const player = document.querySelector(`#contender__canvas-${data.clientID}`)! as HTMLCanvasElement;
+  console.log(player)
+  let width = document.createAttribute("width");
+  let height = document.createAttribute("height");
+  width.value = (COL * (SQ / 2)).toString();
+  height.value = (ROW * (SQ / 2)).toString();
+  // Set the height and width of the class attribute
+  player.setAttributeNode(width);   
+  player.setAttributeNode(height);
+  
+  let ctxRival = player.getContext("2d") as CanvasRenderingContext2D;
+      ctxRival.scale(0.5,0.5)
+  eraseGameBoard(ctxRival,ROW,COL);
+  drawGameBoard(ctxRival,ROW,COL);
+
+  console.log(data.piece._activeTetrominoe)
+  /// YOU LEFT IF HERE
+  // PROBLEMS WITH THE GAME OVER
+  // CONSIDER MOVING THIS FUNCTION TO THE APP.JS
+
+} 
+
+const drawContenders = (contenders:any[]) => {  
+  contenders.forEach(contender => {
+    rivalTemplate(contender);
+  })
+
+}
+/*
+const drawOpponents = (opponent?:any) => {
+    ctxRival = rivalCanvas.getContext("2d") as CanvasRenderingContext2D;
+    ctxRival.scale(0.5,0.5)
+    eraseGameBoard(ctxRival,ROW,COL);
+    drawGameBoard(ctxRival,ROW,COL);
+    drawPiece(ctxRival,opponent.piece)
+  }
+  else{
+    console.log('player already exists')
+    //repace the node and update the new
+    
+  }
+  
+  
+}
+*/
 
 const isContenderAlreadyPlaying = (rivalID:string) => {
   //if return is -1 then player is not in the array
@@ -84,42 +153,6 @@ const isContenderAlreadyPlaying = (rivalID:string) => {
   }
 
 }
-
-const drawOpponents = (opponent?:any) => {
-  //check if the opponent already exist
-
-  let rivalCanvas:HTMLCanvasElement;
-  let ctxRival:CanvasRenderingContext2D;
-  //new contender to be added
-  if(contenderIndex === -1){
-    contenders.push(opponent.clientID)
-    console.log(opponent)
-    const rivals = document.querySelector(`.contenders`)!;
-    rivalCanvas = document.createElement("canvas");
-    rivalCanvas.id = opponent.clientID;
-    rivalCanvas.className = 'opponent';
-    rivalCanvas.width = COL * (SQ / 2);
-    rivalCanvas.height = ROW * (SQ / 2);
-    rivals.appendChild(rivalCanvas);    
-    ctxRival = rivalCanvas.getContext("2d") as CanvasRenderingContext2D;
-    ctxRival.scale(0.5,0.5)
-    eraseGameBoard(ctxRival,ROW,COL);
-    drawGameBoard(ctxRival,ROW,COL);
-    drawPiece(ctxRival,opponent.piece)
-  }
-  else{
-    console.log('player already exists')
-    //repace the node and update the new
-    
-  }
-  
-  
-}
-
-
-
-
-
 
 export const sendGameStatus = (status: any) => {
   //send all of the necesary data to the server

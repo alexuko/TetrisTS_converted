@@ -47,38 +47,6 @@ const backdrop = document.querySelector(".backdrop")! as HTMLElement;
 const pauseButton = document.querySelector('#play-pause-btn')! as HTMLButtonElement;
 
 
-// export let contenders:any = [];
-// const drawOpponents = (opponent?:any) => {
-
-//   //check if the opponent already exist
-//   const contenderIndex = contenders.indexOf(opponent.clientID)
-//   let rivalCanvas:HTMLCanvasElement;
-//   let ctxRival:CanvasRenderingContext2D;
-//   //new contender to be added
-//   if(contenderIndex === -1){
-//     contenders.push(opponent.clientID)
-//     console.log(opponent)
-//     const rivals = document.querySelector(`.contenders`)!;
-//     rivalCanvas = document.createElement("canvas");
-//     rivalCanvas.id = opponent.clientID;
-//     rivalCanvas.className = 'opponent';
-//     rivalCanvas.width = COL * (SQ / 2);
-//     rivalCanvas.height = ROW * (SQ / 2);
-//     rivals.appendChild(rivalCanvas);    
-//     ctxRival = rivalCanvas.getContext("2d") as CanvasRenderingContext2D;
-//     ctxRival.scale(0.5,0.5)
-//     eraseGameBoard(ctxRival,ROW,COL);
-//     drawGameBoard(ctxRival,ROW,COL);
-//     drawPiece(ctxRival,opponent.piece)
-//   }
-//   else{
-//     console.log('player already exists')
-//     //repace the node and update the new
-    
-//   }
-// }
-
-
 const pauseGame = () => {  
   //change status of the game with event listener
   // console.log('pause button pressed')
@@ -822,4 +790,8 @@ playBtn.addEventListener("click", startGame);
 pauseButton.addEventListener('click', pauseGame);
 ["keydown", "keyup"].forEach((e) => window.addEventListener(e, keyControl));
 
-
+export {
+  drawGameBoard,
+  eraseGameBoard,
+  drawPiece
+}

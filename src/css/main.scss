@@ -153,12 +153,13 @@ input[type=submit]{
 }
 
 
+// ******************* GAME  *******************
 
 .game{
     display: grid;
-    grid-template-columns: 1fr repeat(3, minmax(max-content, min-content)) 1fr;
+    grid-template-columns: minmax(5rem, .5fr) repeat(3, minmax(max-content, min-content)) 1fr;
     grid-template-rows: 1fr minmax(max-content, auto)  1fr;
-    gap: 10rem;
+    gap: 5rem;
     justify-content: center;
 }
 
@@ -276,30 +277,50 @@ canvas#nextPiece  {
 // ******************* PLAYGROUND - GAME  *******************
 
 canvas#tetris  {
+    background-color: hsla(0, 0%, 6%, 1.0);
     border: 6px solid rgb(124, 123, 123);
     margin: 2rem auto;
 }
-
-canvas#tetris,
-canvas.opponent  {
-    background-color: hsla(0, 0%, 6%, 1.0);
-}
-
-canvas.opponent  {
-    border: 3px solid rgb(124, 123, 123);
-}
-
 
 
 // ******************* CONTENDERES  *******************
 
 .contenders{
-    grid-row: 2 / span 1;
-    grid-column: 4 / -1;
-    
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    
+    grid-row: 2/span 1;
+    grid-column: 4/-1;
+    max-height: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem;
+    align-items: stretch;
+    padding: 0;
+    // background-color: orange;
 }
+
+.contender{
+    // background-color: #bd4040;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    &__name{
+        text-transform: uppercase;
+    }
+    &__canvas{
+        background-color: hsla(0, 0%, 6%, 1.0);
+        border: 3px solid rgb(124, 123, 123);
+        margin: 1rem 0;    
+    }
+    &__records{
+        color: rgb(173, 173, 173);
+    }
+
+    &__records > p > strong{
+        color: rgb(35, 255, 46);
+    }
+}
+
+
 
