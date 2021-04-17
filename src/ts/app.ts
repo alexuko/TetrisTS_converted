@@ -57,15 +57,15 @@ const pauseGame = () => {
     buttonState = 'Play';
     pauseButton.classList.add('btn-play')
     //stop sending data to the server
-    stopSendingData();
+    shouldSendData(false);
   }  
   else{ //if Playing
-    console.log('game is on')
+    // console.log('game is on')
     pauseButton.classList.remove('btn-play')
     buttonState = 'Pause';
     pauseButton.classList.add('btn-pause')
     //restart sending data to the server
-    startSendingData();
+    shouldSendData(true);
     update();
   }
   //set UI button status
@@ -113,12 +113,10 @@ const init = (name: string, selectedLevel: number) => {
   lines = records.lines;
   level = records.level;
   //initialize game status
-  gameStatus.piece = piece;
-  gameStatus.records = records;
-  gameStatus.gameboard = gameBoard;
+  updateGameStatus(gameBoard,piece,records,gameOver)  
   //update high scores table
   localStorage.updateScoresTable();
-  startSendingData();
+  shouldSendData(true)
   update();
   
   
@@ -167,7 +165,7 @@ const eraseGameBoard = (
 };
 
 const drawPiece = (ctx: any, currentPiece: any,gameBoard:number[][]) => {
-  console.log(currentPiece);
+  // console.log(currentPiece);
   try {
     // let count = 0;
     currentPiece.activeTetrominoe.forEach((row: number[], rIndex: number) => {
@@ -182,7 +180,7 @@ const drawPiece = (ctx: any, currentPiece: any,gameBoard:number[][]) => {
               gameBoard[currentPiece.y + rIndex][currentPiece.x + cIndex] === undefined) 
               {
                 if(!gameOver){
-                  gameIsOver(true);  
+                  setGameOver();  
                   //notify other players that game is over.
                   //TODO      
                 }              
@@ -203,13 +201,17 @@ const drawPiece = (ctx: any, currentPiece: any,gameBoard:number[][]) => {
   }
 };
 
-const gameIsOver = (isOver:boolean) => {
+const setGameOver = () => {
   //set the gameover flag to true
-  gameOver = isOver;
+  gameOver = true;
   // alert("GAME OVER !");
+  updateGameStatus(gameBoard,piece,records,gameOver)
+  shouldSendData(true)
   //save records in the local storage
   localStorage.saveToLocalStorage();
   localStorage.updateScoresTable();
+  shouldSendData(false);
+  
   //show to the player that the game is over
   backdrop.style.display = "flex";
 };  
@@ -296,7 +298,7 @@ const pullRowsDown = (from: number) => {
   // console.table(gameBoard)
 };
 
-const merge = () => {
+const merge = (piece:Piece) => {
   try {
     //check tetrominoe matrix (rows and cols)
     //first loop through all of the rows
@@ -323,18 +325,19 @@ const moveDown = () => {
     piece.moveTo(moveTowards("down"));
     drawPiece(GBctx, piece,gameBoard);
   } else {
-    merge();
+    merge(piece);
+
     checkFullRows();
     drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
     piece = getRandomPiece();
+    updateGameStatus(gameBoard,piece,records,gameOver)
     drawPiece(GBctx, piece, gameBoard);
     getNextPiece();
   }
 };
 
 const hardDrop = () => {
-  // console.log(`hard drop`)
   //get tetrominoe last occupied positions in its matrix (row and col)
   const tetroLastCol = piece.lastOccupiedRowOrCol(false);
   const tetroLastRow = piece.lastOccupiedRowOrCol(true);
@@ -710,16 +713,24 @@ const getNextPiece = () => {
   drawPiece(NPctx, nextPiece, gameBoard);
 };
 
-const startSendingData = () => {
+
+const shouldSendData = (send:boolean) => {
+  console.log(`Sending data --> ${send}`)
+  if(send){
     sendToServer = setInterval(() => {
-      // console.log(`data sent`)    
+      // console.log(`KEEP sending`)    
       clientServer.sendGameStatus(gameStatus)
       // console.log(gameStatus)
-    }, 1000);
-  // clearInterval(sendToServer);
+    }, 250);
+  }else{
+    console.log(`STOP sending`)    
+    clearInterval(sendToServer);
+    
+  }
+  
+
 }
 
-const stopSendingData = () => clearInterval(sendToServer);
 
 const update = () => {
 
@@ -730,26 +741,28 @@ const update = () => {
       const sec = 1000 / speed;      
       
       if (timeCounter > sec) {
-        moveDown();// clientServer.sendGameStatus(gameStatus);
-        // drawOpponents(gameStatus);
+        moveDown();
         start = Date.now();
       }
       // eslint-disable-next-line no-unused-vars
       requestAnimationFrame(update);
     
     } 
-    else{
-      stopSendingData();
-    }
-
-};
-
-const keyControl = (e: any) => {
-  // console.log(e)
-  if (gameOver || isGamePaused) return;
+    
+  };
   
-  else {
-    if (e.type === "keydown") {
+  const updateGameStatus = (gameBoard: number[][], piece: Piece, records: Records, rivalLost:boolean) => {
+    gameStatus.piece = piece;
+    gameStatus.records = records;
+    gameStatus.gameboard = gameBoard;
+    gameStatus.lost = rivalLost
+  }
+  const keyControl = (e: any) => {
+    // console.log(e)
+    if (gameOver || isGamePaused) return;
+    
+    else {
+      if (e.type === "keydown") {
       // console.log(e.code)
       if (e.key === "KeyZ" || e.keyCode === 90) rotate(false);
       else if (e.key === "ArrowUp" || e.keyCode === 38) rotate(true);
@@ -782,6 +795,7 @@ export {
   eraseGameBoard,
   drawPiece
 }
+
 
 
 

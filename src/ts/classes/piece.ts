@@ -7,18 +7,30 @@ export default class Piece {
   private _tetrominoe: number[][][];
   private _activeTetrominoe: number[][];
 
-  constructor(tetrominoe: number[][][], color: number[], number: number) {
+    constructor(tetrominoe: number[][][], color: number[], number: number, xCoor?:number,yCoor?:number, pos?:number){
     this._tetrominoe  = tetrominoe; //tetrominoe with its positions
     this._color = color; //color from the colors array
     this._number = number;// tetromino number 0 - 6 there are 7 different pieces
     // All tetrominoes spawn horizontally and wholly above the playfield.
     // I & O spawn middle AND  J,L,S,Z & T  spawn rounded to the left.
-    this._x = 3;
-    this._y = this._number < 5 ? 0 : -1;// If I | O then piece spawns at y = -1
-    this._position = 0;// each tetrominoe has 4 positions (0 - 3) except O (square) as it rotation is null
+    xCoor !== undefined ? this._x = xCoor : this._x = 3;  
+    yCoor !== undefined ? this._y = yCoor : this._y = this._number < 5 ? 0 : -1;// If I | O then piece spawns at y = -1
+    pos   !== undefined ? this._position = pos : this._position = 0;// each tetrominoe has 4 positions (0 - 3) except O (square) as it rotation is null
     this._activeTetrominoe = this.tetrominoe[this._position]; //tetrominow with current position
   }
 
+  // constructor(tetrominoe: number[][][], color: number[], number: number) {
+  //   this._tetrominoe  = tetrominoe; //tetrominoe with its positions
+  //   this._color = color; //color from the colors array
+  //   this._number = number;// tetromino number 0 - 6 there are 7 different pieces
+  //   // All tetrominoes spawn horizontally and wholly above the playfield.
+  //   // I & O spawn middle AND  J,L,S,Z & T  spawn rounded to the left.
+  //   this._x = 3;
+  //   this._y = this._number < 5 ? 0 : -1;// If I | O then piece spawns at y = -1
+  //   this._position = 0;// each tetrominoe has 4 positions (0 - 3) except O (square) as it rotation is null
+  //   this._activeTetrominoe = this.tetrominoe[this._position]; //tetrominow with current position
+  // }
+  
   
 
   public get color(){
@@ -101,5 +113,6 @@ export default class Piece {
 }
 //method created to sort out the problem with rendering piece for contender
 export const clonePiece = (piece:any) => {
-  return new Piece(piece._tetrominoe,piece._color,piece._number);  
+  // debugger
+  return new Piece(piece._tetrominoe, piece._color ,piece._number , piece._x, piece._y,piece._position);   
 }
