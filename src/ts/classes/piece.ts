@@ -19,20 +19,6 @@ export default class Piece {
     this._activeTetrominoe = this.tetrominoe[this._position]; //tetrominow with current position
   }
 
-  // constructor(tetrominoe: number[][][], color: number[], number: number) {
-  //   this._tetrominoe  = tetrominoe; //tetrominoe with its positions
-  //   this._color = color; //color from the colors array
-  //   this._number = number;// tetromino number 0 - 6 there are 7 different pieces
-  //   // All tetrominoes spawn horizontally and wholly above the playfield.
-  //   // I & O spawn middle AND  J,L,S,Z & T  spawn rounded to the left.
-  //   this._x = 3;
-  //   this._y = this._number < 5 ? 0 : -1;// If I | O then piece spawns at y = -1
-  //   this._position = 0;// each tetrominoe has 4 positions (0 - 3) except O (square) as it rotation is null
-  //   this._activeTetrominoe = this.tetrominoe[this._position]; //tetrominow with current position
-  // }
-  
-  
-
   public get color(){
       return this._color;
   }
@@ -85,7 +71,7 @@ export default class Piece {
     this._number = newNumber;
   }
 
-  moveTo(dir:any) {
+  public moveTo(dir:any) {
     if (!dir || dir[0] === "rotate") return;
     //directions a piece can move to
     if (dir[0] === "up") this._y -= 1;
@@ -94,7 +80,7 @@ export default class Piece {
     if (dir[0] === "down") this._y += 1;
   }
 
-  lastOccupiedRowOrCol(isRow: boolean) {
+  public lastOccupiedRowOrCol(isRow: boolean) {
     let row = 0,
       col = 0;
     for (let r = 0; r < this._activeTetrominoe.length; r++) {

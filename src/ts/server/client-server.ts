@@ -2,11 +2,17 @@ import { SQ, ROW, COL, getColor } from "../assets/assets";
 import { gameStatus } from "../app";
 import { drawGameBoard, eraseGameBoard, drawPiece } from "../app";
 import { clonePiece } from "../classes/piece";
-
+import { Header } from "../assets/assets";
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
-export const ws = new WebSocket("ws://localhost:8080");
 let contenders:string[] = [];
 const contendersBox = document.querySelector(".contenders")!;
+
+export const connection = () => {
+  return new WebSocket("ws://localhost:8080");
+}
+
+let ws:WebSocket = connection();
+
 
 ws.addEventListener("open", () => {
   console.log("Ready to rock you are connected");
@@ -16,44 +22,91 @@ ws.addEventListener("close", () => {
   console.log("desconnected from the server");
 });
 
-ws.addEventListener("message", (msgRecv) => {
-  const data = msgRecv.data;
-  //If the string received from server is > 20 && < 40, then that's the UUID
-  try {
+ws.addEventListener("message", msgRecv => {
+  console.log('msgRecv')
+  const data = msgRecv.data
+  const dataToJSON = JSON.parse(data)
+  const header = dataToJSON.header;
+  const message = dataToJSON.message;
+  console.log(header)
+  switch(header){
+    case Header.CONNECT:
+      //this will save the client ID
+      console.log(`Message received from server, This is your ID: ${message}`)
+      gameStatus.clientID = message; 
+      console.log(`Status: ID: ${gameStatus.clientID}`)
+      break;
+    case Header.NEWGAME:
+      //request the server to create a new game
+      break;  
+      case Header.JOIN:
+      //request the server to join game
+      //send the game id you wanna join
+      break;  
+    case Header.PLAY:
+      //send your game status to the server
+      drawContender(data);
+      break;  
+    case Header.QUIT:
+      //tell server that you have lost
+      const contenderID:string = dataToJSON.clientID;
+      const index = getContenderIndex(contenderID);
+      removeContender(contenders,index,contenderID);        
+      break;  
+    default:
+      console.log('Unknown action')
+  }
 
-    if (data.length < 40 && data.length > 20) {
-      gameStatus.clientID = msgRecv.data;     
-      console.log(gameStatus.clientID)
-    }
-    else{
+});
+
+const drawContender = (data:any) => {
+   try {
       const contenderData = JSON.parse(data);
       //get the ID so we can check if the client is already in the list of playeres
       const contenderID:string = contenderData.clientID;
       //get the index of the player, if not existent then returns -1
-      const indexContender = isContenderInTheArray(contenderID);
+      const indexContender = getContenderIndex(contenderID);
       let rivalHTML:HTMLCanvasElement;
-
+      
       //if this is the first player in the array or the player is not in the array then add it
       if (contenders.length === 0 || indexContender === -1) {
-        console.log(`NEW contender!`);
+        //NEW contender!
         contenders.push(contenderID);
+        //built contender's html and fill it in with data
         rivalHTML = newRivalPlayground(contenderData)
         buildRivalGame(rivalHTML,contenderData,true);
+      
       } else {
-        // console.log(`contender is already playing: Replacing new data`);
+        // contender is already playing: Replacing it with new data
         rivalHTML = getContenderHTMLelement(contenderID);
         buildRivalGame(rivalHTML,contenderData,false);
+        // if(contenderData.lost === true) removeContender(contenders,indexContender,contenderID);
       }
 
-      // drawContenders(contenders);
-    }
     return;
   } catch (e) {
     console.log('something happen: '  +  e)
   }
-});
+}
 
+const removeContender = (contenders: string[], indexContender: number, contenderID: string) => {
+  console.log(`removeContender from the UI`)
+  try{
+    // remove it from the array of contenders
+    contenders.splice(indexContender,1)
+    //remove it from the node of contenders
+    const child = getContenderHTMLelement(contenderID);
+    //get child's parent
+    const parent = child.parentNode;
+    //if parent exist then remove child
+    if(parent) parent.removeChild(child);
 
+  }catch(error){
+    console.log( `something went wrong deleting contender ${error}`)
+  }
+
+  
+}
 
 const getContenderHTMLelement = (ID:string) => {
   // console.log(`getContenderHTMLelement`)
@@ -71,7 +124,7 @@ const getContenderHTMLelement = (ID:string) => {
 
 const newRivalPlayground = (data: any) => {
   // console.log(data)
-  const test = 1;
+  const showContenderIn_UI = 1;
   const markup = `
             <article id="${data.clientID}" class="contender">
                 <h5 class="contender__name">${data.records._player}</h5>
@@ -87,7 +140,7 @@ const newRivalPlayground = (data: any) => {
                     </div>
                     <div class="record">
                         <p>status:</p>
-                        <strong class="contender__records-status">${test}</strong>
+                        <strong class="contender__records-status">${showContenderIn_UI}</strong>
                     </div>
                 </div>
             </article>
@@ -101,7 +154,7 @@ const newRivalPlayground = (data: any) => {
   return rival;
 };
 
-function updateRecords(rivalHTML: HTMLCanvasElement,data:any) {
+const updateRecords = (rivalHTML: HTMLCanvasElement,data:any) => {
   let canvas:any
   //update player name
   let player = rivalHTML.children.item(0)!;
@@ -159,7 +212,7 @@ const buildRivalGame = (rivalHTML:HTMLCanvasElement, data:any, isNewPlayer:boole
   drawPiece(ctxRival, rivalPiece, data.gameboard);
 };
 
-const isContenderInTheArray = (rivalID: string) => {
+const getContenderIndex = (rivalID: string) => {
   let index = -1;
   //check in the array of contenders if the player is already in the array
   for (let i = 0; i < contenders.length; i++) {
@@ -178,8 +231,7 @@ export const sendGameStatus = (status: any) => {
   }
 };
 
-
-
-
-
+export const closeConnection = () => {
+  ws.close(1000,'Player lost then a new connection is required')  
+}
 

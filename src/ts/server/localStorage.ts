@@ -40,7 +40,7 @@ const saveToLocalStorage = () => {
       return -1;
     }
     
-  }
+}
   
 const compareScores = () => {
     // console.log('comparing...')
@@ -78,10 +78,9 @@ const compareScores = () => {
     }
     // console.log('completed')
     return arr;
-  }
-
+}
   
-  const setScoreTable = (scoreTable:any[])=> {
+const setScoreTable = (scoreTable:any[])=> {
     try {
       //get the table 
       if(scoreTable.length > 0){
@@ -110,9 +109,9 @@ const compareScores = () => {
     }
 
       
-  }
+}
 
-  const updateScoresTable = () => {
+const updateScoresTable = () => {
     const theScores = compareScores();
     //update UI for the records
     setScoreTable(theScores);
@@ -121,7 +120,7 @@ const compareScores = () => {
 }
 
   
-  export {
-      saveToLocalStorage,        
-      updateScoresTable  
-  }
+export {
+  saveToLocalStorage,        
+  updateScoresTable  
+}

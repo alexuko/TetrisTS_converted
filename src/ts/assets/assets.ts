@@ -1,7 +1,13 @@
 // MOD of positive or negative numbers
 // returns remainder of dividend by divisor
 const mod = (dividend: number, divisor:number) =>  (dividend % divisor + divisor) % divisor;
-
+enum Header {
+    CONNECT = 'CONNECT',
+    NEWGAME = 'NEWGAME',
+    PLAY = 'PLAY',
+    JOIN = 'JOIN',
+    QUIT = 'QUIT'
+  }
 // Canvas measures
 const COL = 10;
 const ROW = 22;
@@ -22,12 +28,11 @@ const getColor = (pick:number) => {
     return colors[pick];
 }
 
-
-
 export {
     getColor,
     COL,
     ROW,
     SQ,
-    mod
+    mod,
+    Header
 }

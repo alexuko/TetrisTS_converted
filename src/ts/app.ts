@@ -7,9 +7,11 @@ import Piece from "./classes/piece";
 import * as tests from "./assets/SRS_offsets";
 import * as clientServer from "./server/client-server";
 import * as localStorage from './server/localStorage';
+import { Header } from "./assets/assets";
 
 let score: number,
   player: string,
+  multiplayer:boolean,
   lines: number,
   level: number,
   speed: number = 0,
@@ -71,7 +73,8 @@ const pauseGame = () => {
   //set UI button status
   pauseButton.textContent = buttonState.toUpperCase();
 
-} 
+}
+
 const startGame = (e: any) => {
   e.preventDefault();
   const arr = Array.from(formValues).map((el) => el.value);
@@ -80,7 +83,8 @@ const startGame = (e: any) => {
   speed = level;
   // console.log(`playerName: ${player} \nplayerLevel: ${level} \nspeed: ${speed} `);
   backdrop.style.display = "none";
-  init(player, speed);  
+  multiplayer = true;
+  init(player, speed); 
   
 };
 
@@ -96,11 +100,6 @@ const init = (name: string, selectedLevel: number) => {
   
   let GB = new Gameboard(ROW, COL);
   gameBoard = GB.createGameBoard();
-  //testing
-  // gameBoard[21][1] = 1;  
-  // gameBoard[21][2] = 2;  
-  // gameBoard[21][3] = 3;  
-  // gameBoard[21][4] = 4;  
   brush = new Brush(SQ);
   gameOver = false;
   records = new Records(name, selectedLevel);
@@ -112,13 +111,15 @@ const init = (name: string, selectedLevel: number) => {
   score = records.score;
   lines = records.lines;
   level = records.level;
-  //initialize game status
-  updateGameStatus(gameBoard,piece,records,gameOver)  
   //update high scores table
   localStorage.updateScoresTable();
-  shouldSendData(true)
-  update();
-  
+  //if is a multiplayer game then send data
+  if(multiplayer){
+    //initialize game status
+    updateGameStatus(gameBoard,piece,records,gameOver,Header.PLAY)  
+    shouldSendData(true)
+  } 
+  update(); 
   
 };
 
@@ -205,14 +206,13 @@ const setGameOver = () => {
   //set the gameover flag to true
   gameOver = true;
   // alert("GAME OVER !");
-  updateGameStatus(gameBoard,piece,records,gameOver)
-  shouldSendData(true)
+  updateGameStatus(gameBoard,piece,records,gameOver,Header.QUIT)
+  clientServer.sendGameStatus(gameStatus)
+  // clientServer.closeConnection();
   //save records in the local storage
   localStorage.saveToLocalStorage();
   localStorage.updateScoresTable();
   shouldSendData(false);
-  
-  //show to the player that the game is over
   backdrop.style.display = "flex";
 };  
 
@@ -331,7 +331,7 @@ const moveDown = () => {
     drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
     piece = getRandomPiece();
-    updateGameStatus(gameBoard,piece,records,gameOver)
+    updateGameStatus(gameBoard,piece,records,gameOver,Header.PLAY)
     drawPiece(GBctx, piece, gameBoard);
     getNextPiece();
   }
@@ -713,24 +713,21 @@ const getNextPiece = () => {
   drawPiece(NPctx, nextPiece, gameBoard);
 };
 
-
 const shouldSendData = (send:boolean) => {
   console.log(`Sending data --> ${send}`)
   if(send){
     sendToServer = setInterval(() => {
       // console.log(`KEEP sending`)    
       clientServer.sendGameStatus(gameStatus)
-      // console.log(gameStatus)
-    }, 250);
+      //every 500milliseconds 
+    }, 500);
   }else{
     console.log(`STOP sending`)    
-    clearInterval(sendToServer);
-    
+    clearInterval(sendToServer);    
   }
   
 
 }
-
 
 const update = () => {
 
@@ -749,14 +746,16 @@ const update = () => {
     
     } 
     
-  };
+};
   
-  const updateGameStatus = (gameBoard: number[][], piece: Piece, records: Records, rivalLost:boolean) => {
+const updateGameStatus = (gameBoard: number[][], piece: Piece, records: Records, rivalLost: boolean, gameHeader: string) => {
+    gameStatus.header = gameHeader
     gameStatus.piece = piece;
     gameStatus.records = records;
     gameStatus.gameboard = gameBoard;
     gameStatus.lost = rivalLost
-  }
+}
+
   const keyControl = (e: any) => {
     // console.log(e)
     if (gameOver || isGamePaused) return;
