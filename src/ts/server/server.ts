@@ -3,6 +3,7 @@ import { v4 as uuid } from "uuid";
 import { Header } from "../assets/assets";
 const wss = new WebSocket.Server({ port: 8080 });
 let clients: string[] = [];
+let games: any = {}
 
 const removeClient = (clientLeaving: string) => {
   console.log("Client session closed");
@@ -14,6 +15,10 @@ const removeClient = (clientLeaving: string) => {
   console.log(`Clients left in Server: ${clients}`);
 };
 
+const isConnected = (userID: string) => {
+    return clients.includes(userID)
+}
+
 const addClient = (ws: WebSocket) => {
   const client_id = uuid();
   const connection = {
@@ -22,6 +27,7 @@ const addClient = (ws: WebSocket) => {
   }
   const response = JSON.stringify(connection);
   ws.send(response)
+  
   clients.push(client_id);
   console.log(`New client,clientID: ${client_id}, Clients connected: ${clients.length}`);
   return client_id;  
@@ -30,15 +36,18 @@ const addClient = (ws: WebSocket) => {
 const broadcast = (ws:WebSocket,message: any) => {
   wss.clients.forEach((client) => {
     //broadcast message to every client except the one who sent the msg
-      // if (client.readyState === WebSocket.OPEN) {
-      //   client.send(message);
-      // }
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
+      if (client.readyState === WebSocket.OPEN) {
         client.send(message);
       }
+      // if (client !== ws && client.readyState === WebSocket.OPEN) {
+      //   client.send(message);
+      // }
       
     });
 }
+
+
+
 wss.on("connection", (ws, req) => {
   // create a new client 
   const newClient = addClient(ws);
@@ -49,12 +58,31 @@ wss.on("connection", (ws, req) => {
     const messageToString = client_message.toString();
     const messageToJSON = JSON.parse(messageToString);
     const header = messageToJSON.header;
-
+    
     if(!header) return;   
     console.log(`header: ${header}`);
     switch(header){
-      case Header.NEWGAME:
-        //request the server to create a new game
+      case Header.REQ_GAME:
+        //user requested to create a new game
+        const user = messageToJSON.user;
+        //check that user is connected
+        //if connected the create game id
+        if(isConnected(user)){
+          const gameID = `game-${uuid()}`;
+          const msg = {
+            'header': Header.NEW_GAME,
+            'gameID'  : gameID
+          }
+          const message = JSON.stringify(msg);
+          //add new game to games object 
+          games[gameID] = {
+            id: gameID
+          }
+          //send info to the user
+          console.log(games)
+          ws.send(message);
+
+        }
         break;  
         case Header.JOIN:
         //request the server to join game

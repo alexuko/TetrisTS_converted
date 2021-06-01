@@ -1,9 +1,11 @@
 // MOD of positive or negative numbers
 // returns remainder of dividend by divisor
 const mod = (dividend: number, divisor:number) =>  (dividend % divisor + divisor) % divisor;
+
 enum Header {
     CONNECT = 'CONNECT',
-    NEWGAME = 'NEWGAME',
+    REQ_GAME = 'REQ_GAME',
+    NEW_GAME = 'NEW_GAME',
     PLAY = 'PLAY',
     JOIN = 'JOIN',
     QUIT = 'QUIT'

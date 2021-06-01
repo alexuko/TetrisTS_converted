@@ -4,60 +4,98 @@ import { drawGameBoard, eraseGameBoard, drawPiece } from "../app";
 import { clonePiece } from "../classes/piece";
 import { Header } from "../assets/assets";
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
+let ws:WebSocket;
 let contenders:string[] = [];
 const contendersBox = document.querySelector(".contenders")!;
+const btnCreate = document.querySelector('#btn-create')!;
+const gameRoomField = document.querySelector('#game_room_id')!;
 
-export const connection = () => {
+const connection = () => {
   return new WebSocket("ws://localhost:8080");
 }
 
-let ws:WebSocket = connection();
+const connectToServer = () => ws = connection();
 
+const startListening = (ws:WebSocket) =>{
 
-ws.addEventListener("open", () => {
-  console.log("Ready to rock you are connected");
-});
-
-ws.addEventListener("close", () => {
-  console.log("desconnected from the server");
-});
-
-ws.addEventListener("message", msgRecv => {
-  console.log('msgRecv')
-  const data = msgRecv.data
-  const dataToJSON = JSON.parse(data)
-  const header = dataToJSON.header;
-  const message = dataToJSON.message;
-  console.log(header)
-  switch(header){
-    case Header.CONNECT:
-      //this will save the client ID
-      console.log(`Message received from server, This is your ID: ${message}`)
-      gameStatus.clientID = message; 
-      console.log(`Status: ID: ${gameStatus.clientID}`)
-      break;
-    case Header.NEWGAME:
-      //request the server to create a new game
-      break;  
+  ws.addEventListener("open", (e) => {
+    console.log("Ready to rock you are connected");
+  });
+  
+  ws.addEventListener("close", () => {
+    console.log("desconnected from the server");
+  });
+  
+  ws.addEventListener("message", (msgRecv) => {
+    console.log("msgRecv");
+    const data = msgRecv.data;
+    const dataToJSON = JSON.parse(data);
+    const header = dataToJSON.header;
+  
+    console.log(dataToJSON);
+    switch (header) {
+      case Header.CONNECT:
+        //this will save the client ID
+        const message = dataToJSON.message;
+        console.log(`Message received from server, This is your ID: ${message}`);
+        gameStatus.clientID = message;
+  
+        console.log(`Status: ID: ${gameStatus.clientID}`);
+        break;
+      case Header.NEW_GAME:
+        //request the server to create a new game
+        console.log("new game");
+        const gameID = dataToJSON.gameID
+        gameRoomField.setAttribute("value", gameID);
+        gameStatus.gameID = gameID;
+        console.log(gameStatus)
+        break;
       case Header.JOIN:
-      //request the server to join game
-      //send the game id you wanna join
-      break;  
-    case Header.PLAY:
-      //send your game status to the server
-      drawContender(data);
-      break;  
-    case Header.QUIT:
-      //tell server that you have lost
-      const contenderID:string = dataToJSON.clientID;
-      const index = getContenderIndex(contenderID);
-      removeContender(contenders,index,contenderID);        
-      break;  
-    default:
-      console.log('Unknown action')
-  }
+        //request the server to join game
+        //send the game id you wanna join
+        break;
+      case Header.PLAY:
+        //send your game status to the server
+        drawContender(data);
+        break;
+      case Header.QUIT:
+        //tell server that you have lost
+        const contenderID: string = dataToJSON.clientID;
+        const index = getContenderIndex(contenderID);
+        removeContender(contenders, index, contenderID);
+        break;
+      default:
+        console.log("Unknown action");
+    }
+  });
+}
 
-});
+
+
+const requestCreateGame = () => {
+  if (!ws) ws = connectToServer()
+  
+  if(ws){
+    startListening(ws)
+    setTimeout(()=>{
+      const msg = {
+        header: Header.REQ_GAME,
+        user: gameStatus.clientID,
+      };
+      console.log(msg);
+      ws.send(JSON.stringify(msg));
+
+    },750)
+
+  }
+};
+
+btnCreate.addEventListener('click', requestCreateGame)
+
+
+
+
+
 
 const drawContender = (data:any) => {
    try {
@@ -80,7 +118,7 @@ const drawContender = (data:any) => {
         // contender is already playing: Replacing it with new data
         rivalHTML = getContenderHTMLelement(contenderID);
         buildRivalGame(rivalHTML,contenderData,false);
-        // if(contenderData.lost === true) removeContender(contenders,indexContender,contenderID);
+      
       }
 
     return;

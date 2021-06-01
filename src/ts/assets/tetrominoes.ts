@@ -2,7 +2,7 @@
 
 /***** TETROMINOES *******/
 let tetrominoes = [
-    // [0] T-tetrominoe
+    // [0] T-tetromino
     [
   
         [ // Position - 0
@@ -26,7 +26,7 @@ let tetrominoes = [
             [0, 1, 0]
         ]
     ],
-    // [1] L-tetrominoe
+    // [1] L-tetromino
     [
         
         [ // Position - 0
@@ -50,7 +50,7 @@ let tetrominoes = [
             [0, 2, 0]
         ]
     ],
-    // [2] J-tetrominoe
+    // [2] J-tetromino
     [
         [ // Position - 0
             [3, 0, 0],
@@ -73,7 +73,7 @@ let tetrominoes = [
             [3, 3, 0]
         ]
     ],
-    // [3] S-tetrominoe
+    // [3] S-tetromino
     [   
         [ // Position - 0
             [0, 4, 4],
@@ -97,7 +97,7 @@ let tetrominoes = [
         ]
         
     ],
-    // [4] Z-tetrominoe
+    // [4] Z-tetromino
     [
         [ // Position - 0
             [5, 5, 0],
@@ -120,6 +120,7 @@ let tetrominoes = [
             [5, 0, 0]
         ],
     ],
+    // [5] O-tetromino
     [   
         [   // Position - 0,1,2,3
             [0, 0, 0, 0],
@@ -128,7 +129,7 @@ let tetrominoes = [
             [0, 0, 0, 0]
         ]
     ],
-    // [6] I-tetrominoe
+    // [6] I-tetromino
     [   
         [ // Position - 0
             [0, 0, 0, 0],

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +8,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="./src/css/main.scss" />
 </head>
+
 <body>
 
     <div class="backdrop">
@@ -19,14 +21,15 @@
                 <input type="number" class="input-value level" name="level" min="1" max="15" value="1">
                 <input type="submit" class="btn submit-btn" value="Play">
             </form>
-            <button class="btn-small create-game-room">Create game</button>
+
+            <button class="btn-small" id="btn-create">Create game</button>
             <p>my room</p>
-            <input type="text" class="input-roomID" name="level" placeholder="roomID">
+            <input type="text" class="game_room_id" name="game_room_id" id="game_room_id" placeholder="roomID" value="" readonly>
             <button class="btn-small join-game-room">Join Game</button>
         </div>
     </div>
 
-    <main class="game">      
+    <main class="game">
         <!-- records    -->
         <section class="records">
             <div class="details">
@@ -55,33 +58,33 @@
                     </div>
                 </span>
             </div>
-            
+
             <div class="high_scores">
                 <div class="tag">high scores</div>
 
                 <ul class="best-players-list">
-                    
+
                     <li class="ranked-player">
                         <div class="best first-place ply-name">noname</div>
                         <strong class="top_score best-player-score">0</strong>
-                    </li>   
+                    </li>
 
                     <li class="ranked-player">
                         <div class="best second-place ply-name">noname</div>
                         <strong class="top_score second-best-player-score">0</strong>
-                    </li>                    
-                    
+                    </li>
+
                     <li class="ranked-player">
                         <div class="best third-place ply-name">noname</div>
                         <strong class="top_score third-best-player-score">0</strong>
-                    </li>                    
+                    </li>
                 </ul>
 
             </div>
-        </section>      
-          <!-- game area  -->
+        </section>
+        <!-- game area  -->
         <section class="game-area-box">
-            
+
             <!-- NEXT PIECE  -->
             <div class="game_hint">
                 <div class="next_piece">
@@ -92,14 +95,14 @@
 
             <!-- MAIN GAME  -->
             <canvas id="tetris"></canvas>
-            
+
             <!-- PLAY/PAUSE BTN -->
             <div class="play-pause-control">
                 <button id="play-pause-btn" class="btn btn-pause">Pause</button>
             </div>
 
-        </section>    
-          <!-- rivals  -->
+        </section>
+        <!-- rivals  -->
         <section class="contenders">
             <!-- TEMPLATE
                 <article id="${data.clientID}" class="contender">
@@ -124,7 +127,8 @@
 
         </section>
     </main>
-    
-<script src="./src/ts/app.ts"></script>
+
+    <script src="./src/ts/app.ts"></script>
 </body>
+
 </html>

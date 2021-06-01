@@ -48,8 +48,9 @@ body    {
     background-color: rgb(179, 179, 179);
     background: linear-gradient(hsl(209, 59%, 31%) 0%, hsl(209, 96%, 9%) 50%, hsl(209, 96%, 12%) 100%);
 
-    padding: 1rem;
-    
+    padding: 5rem;
+    min-width: 60rem;
+    width: 33vw;
     min-height: 15rem;
     display: flex;
     flex-direction: column;
@@ -87,7 +88,12 @@ label{
 
 }
 
+input#game_room_id{
+    width: 100%;
+    font-size: 2rem;
+    padding: 1rem;
 
+}
 input[type=text]:placeholder-shown {
     color: white;
     font-weight: 100;

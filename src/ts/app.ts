@@ -158,8 +158,6 @@ const eraseGameBoard = (
     //now iterate through each column from each row
     for (let c = 0; c < cols; c++) {
       // and then, draw a square
-      // const color = getColor(gameBoard[r][c]);
-      // console.log(color)
       brush.undrawSquare(ctx, c, r);
     }
   }
@@ -312,8 +310,7 @@ const merge = (piece:Piece) => {
       }
     }
   } catch (e) {
-    //this error will pop out if a problem with merging the piece
-    //most likely when piece merges out of bounds ( negative rows)
+    //this error will pop out if a problem with merging the piece most likely when piece merges out of bounds ( negative rows)
     console.error("Error merging the piece: " + e);
   }
 };
@@ -326,7 +323,6 @@ const moveDown = () => {
     drawPiece(GBctx, piece,gameBoard);
   } else {
     merge(piece);
-
     checkFullRows();
     drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
@@ -389,13 +385,9 @@ const moveLeft = (rotateAction = false) => {
 
 const rotate = (clockwise: boolean, rotTimes: number = 0) => {
   try {
-    // console.log(`***** START *****`)
-    // console.log(`Rotation-times: ${rotTimes}`)
-
     const initialPosition = piece.position;
     const initial_X = piece.x;
     const initial_Y = piece.y;
-    // console.log(`initpos: ${initialPosition}, initX:${initial_X}, initY:${initial_Y}`)
 
     // Check if the piece will rotate clockwise or counterclockwise
     let rotation = clockwise ? 1 : -1;
@@ -406,9 +398,8 @@ const rotate = (clockwise: boolean, rotTimes: number = 0) => {
     // console.log('rotTimes:' + rotTimes);
     //get next position of the tetrominoe (clockwise | counterclockwise)
     piece.position = mod(piece.position + rotation, piece.tetrominoe.length);
-    // console.log(`newPos: ${piece.position}, initX:${initial_X}, initY:${initial_Y}`)
+    
     // get the position from the original tetrominoe and pass it to the active tetrominoe
-    // piece._activeTetrominoe = piece.tetrominoe[piece.position];
     piece.activeTetrominoe = piece.tetrominoe[piece.position];
     // Check if the piece overlapped with the wall, if it did then call wallkick()
     // Arrange the piece to a correct place within the gameboardlines
@@ -418,7 +409,7 @@ const rotate = (clockwise: boolean, rotTimes: number = 0) => {
       drawPiece(GBctx,piece,gameBoard);
       return;
     }
-    //if pieces overlapped then
+    
     // Check that piece did not overlapped with another piece after rotation
     let result = SRS(initial_X, initial_Y, clockwise, rotTimes);
 
@@ -522,7 +513,6 @@ const piecesOverlapped = () => {
         new_x = piece.x + c; // New x (column) position from each square of the tetrominoe
         new_y = piece.y + r; // New y (row)    position from each square of the tetrominoe
         // test to check all of the new positions
-        // console.log(` gameboard: ${gameBoard[new_y][new_x]}, newX: ${new_x}, newY: ${new_y} `)
         // if any of the squares lands on a non empty position in the board then, it overlapped
         // or piece
         // If its not = 0
@@ -552,7 +542,6 @@ const piecesOverlapped = () => {
 };
 
 const collision = (dir: Path) => {
-  // console.log('**********************')
   for (let r = 0; r < piece.activeTetrominoe.length; r++) {
     //loop through all of the rows
     for (let c = 0; c < piece.activeTetrominoe.length; c++) {
@@ -564,10 +553,6 @@ const collision = (dir: Path) => {
       try {
         if (dir[0] === "rotate") {
           //check for collision on rotation
-          // For testing
-          // console.log('Now')
-          // console.log(`yC:${yCoord} xC:${xCoord}`)
-          // console.log('board '+ (gameBoard[yCoord][xCoord] !== empty))
           // Check if any SQUARE that builds up the tetrominoe is out of bounds
           // or overlaps an already occupied space
           if (yCoord < 0 || yCoord >= ROW || xCoord < 0 || xCoord >= COL) {
@@ -623,23 +608,21 @@ const wallKick = () => {
       new_x = piece.x + c;
       new_y = piece.y + r;
 
-      // RIGHT WALL KICK
-      // 10 - 9 = 1 --> Xoffset = 0 -> 1 > 0 = TRUE  --> Xoffset = 1
-      // 11 - 9 = 2 --> Xoffset = 1 -> 1 > 2 = FALSE --> Xoffset = 2
+      // RIGHT WALL KICK 
+      // 10 - 9 = 1 ---> Xoffset = 0 ---> 1 > 0 = TRUE ---> Xoffset = 1 
+      // 11 - 9 = 2 ---> Xoffset = 1 ---> 1 > 2 = FALSE ---> Xoffset = 2       
       if (new_x >= COL) {
         calc = new_x - (COL - 1);
         calc > Xoffset ? (Xoffset = calc) : Xoffset;
       }
 
-      // LEFT WALL KICK
-      // -1 < 0 --> true, then new_x(-1) < Xoffset = 0 --> true, then  Xoffset = -1
-      // -2 < 0 --> true, then new_x(-2) < Xoffset = -1 --> true, then  Xoffset = -2
+      // LEFT WALL KICK 
+      // -1 < 0 ---> true, -1 < 0 (Xoffset) ---> TRUE ---> Xoffset = -1 
+      // -2 < 0 ---> true, -2 < -1 (Xoffset) ---> TRUE --->  Xoffset = -2 
       if (new_x < 0) new_x < Xoffset ? (Xoffset = new_x) : Xoffset;
 
-      // BOTTOM WALL KICK
-      // 20 >= 20 --> true,
-      // then calc (20 - (20 - 1)) = 1
-      // 1 > 0 --> true, then Yoffset = 1
+     
+
       if (new_y >= ROW) {
         calc = new_y - (ROW - 1);
         calc > Yoffset ? (Yoffset = calc) : Yoffset;
@@ -753,7 +736,7 @@ const updateGameStatus = (gameBoard: number[][], piece: Piece, records: Records,
     gameStatus.piece = piece;
     gameStatus.records = records;
     gameStatus.gameboard = gameBoard;
-    gameStatus.lost = rivalLost
+    
 }
 
   const keyControl = (e: any) => {
