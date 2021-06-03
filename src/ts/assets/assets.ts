@@ -6,6 +6,7 @@ enum Header {
     CONNECT = 'CONNECT',
     REQ_GAME = 'REQ_GAME',
     NEW_GAME = 'NEW_GAME',
+    START_GAME = 'START_GAME',
     PLAY = 'PLAY',
     JOIN = 'JOIN',
     QUIT = 'QUIT'

@@ -88,6 +88,23 @@ label{
 
 }
 
+
+button#btn-create,
+button#btn_joinGame{
+    margin: 2rem 1rem;
+    padding: 1rem 2rem;
+    border: none;
+    background-color: hsla(101, 100%, 59%, 0.884);
+    transition: all .3s;
+    
+}
+input.submit-btn:hover,
+button#btn-create:hover,
+button#btn_joinGame:hover{
+    filter: hue-rotate(120deg);
+}
+
+
 input#game_room_id{
     width: 100%;
     font-size: 2rem;
@@ -139,6 +156,8 @@ input[type=submit]{
     border-radius: 5px;
     border: solid 2px hsla(192, 44, 75, 100);  
 }
+
+
 
 .play-pause-control{    
     display: flex;

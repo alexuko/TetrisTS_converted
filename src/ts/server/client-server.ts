@@ -3,12 +3,15 @@ import { gameStatus } from "../app";
 import { drawGameBoard, eraseGameBoard, drawPiece } from "../app";
 import { clonePiece } from "../classes/piece";
 import { Header } from "../assets/assets";
+import { multiplayerGame } from "../app";
+
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 let ws:WebSocket;
 let contenders:string[] = [];
 const contendersBox = document.querySelector(".contenders")!;
 const btnCreate = document.querySelector('#btn-create')!;
-const gameRoomField = document.querySelector('#game_room_id')!;
+const gameID_field = document.querySelector('#game_room_id')! as HTMLInputElement;
+const btn_join = document.querySelector('#btn_joinGame')! as HTMLButtonElement;
 
 const connection = () => {
   return new WebSocket("ws://localhost:8080");
@@ -30,7 +33,7 @@ const startListening = (ws:WebSocket) =>{
     console.log("msgRecv");
     const data = msgRecv.data;
     const dataToJSON = JSON.parse(data);
-    const header = dataToJSON.header;
+    const header: string = dataToJSON.header;
   
     console.log(dataToJSON);
     switch (header) {
@@ -46,13 +49,15 @@ const startListening = (ws:WebSocket) =>{
         //request the server to create a new game
         console.log("new game");
         const gameID = dataToJSON.gameID
-        gameRoomField.setAttribute("value", gameID);
+        gameID_field.value = gameID;
         gameStatus.gameID = gameID;
         console.log(gameStatus)
         break;
-      case Header.JOIN:
-        //request the server to join game
-        //send the game id you wanna join
+      case Header.START_GAME:
+        console.log(dataToJSON)
+        const multiplayer: boolean = dataToJSON.multiplayer;
+        const playing: boolean = dataToJSON.playing;
+        multiplayerGame(multiplayer);
         break;
       case Header.PLAY:
         //send your game status to the server
@@ -72,25 +77,100 @@ const startListening = (ws:WebSocket) =>{
 
 
 
+
+
 const requestCreateGame = () => {
-  if (!ws) ws = connectToServer()
-  
-  if(ws){
-    startListening(ws)
-    setTimeout(()=>{
-      const msg = {
-        header: Header.REQ_GAME,
-        user: gameStatus.clientID,
-      };
-      console.log(msg);
-      ws.send(JSON.stringify(msg));
+  //if not connected yet then connect
+  if (!ws) ws = connectToServer();
 
-    },750)
-
+  if (ws) {
+    //listening
+    startListening(ws);
+    try {
+      setTimeout(() => {
+        // message we are going to send
+        const msg = {
+          header: Header.REQ_GAME,
+          user: gameStatus.clientID,
+        };
+        // check that ready state is 1 or connected
+        if (ws.readyState === 1) ws.send(JSON.stringify(msg));
+      }, 100);
+    } catch (error) {
+      console.log("try again");
+    }
   }
 };
 
+const joinGame = () => {
+  console.log("join game");
+  let gameIDtext = gameID_field.value;
+  if (gameIDtext === "" || gameIDtext.length < 32) {
+    alert(`Invalid game ID: ${gameIDtext}`);
+    gameIDtext = "";
+    return;
+  }
+
+  //if not connected yet then connect
+  const text = "The game will start shortly!".toUpperCase();
+  if (!ws){
+    ws = connectToServer();
+    if (ws) {
+      //listening
+      startListening(ws);
+      try {
+        setTimeout(() => {
+          // message we are going to send
+          //if a valid ID is provided
+          gameStatus.gameID = gameIDtext;
+          const msg = {
+            header: Header.JOIN,
+            clientID: gameStatus.clientID,
+            gameID: gameStatus.gameID,
+          };
+          // check that ready state is 1 or connected
+          if (ws.readyState === 1) ws.send(JSON.stringify(msg));
+          gameID_field.value = text;
+        }, 100);
+      } catch (error) {
+        console.log("try again");
+      }
+    }
+
+  }else{
+    //if a valid ID is provided
+    gameStatus.gameID = gameIDtext;
+    const msg = {
+      header: Header.JOIN,
+      clientID: gameStatus.clientID,
+      gameID: gameStatus.gameID,
+    };
+    ws.send(JSON.stringify(msg));
+    console.log("valid");
+
+    gameID_field.value = text;   
+  }
+  
+
+
+  // //if a valid ID is provided
+  // gameStatus.gameID = gameIDtext;
+  // const msg = {
+  //   header: Header.JOIN,
+  //   clientID: gameStatus.clientID,
+  //   gameID: gameStatus.gameID
+  // };
+  // ws.send(JSON.stringify(msg));
+  // console.log('valid')
+
+  // gameID_field.value = 'Click Play to start';
+};
+
+
+
 btnCreate.addEventListener('click', requestCreateGame)
+btn_join.addEventListener('click', joinGame)
+
 
 
 

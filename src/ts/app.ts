@@ -83,10 +83,24 @@ const startGame = (e: any) => {
   speed = level;
   // console.log(`playerName: ${player} \nplayerLevel: ${level} \nspeed: ${speed} `);
   backdrop.style.display = "none";
-  multiplayer = true;
+  multiplayer = false;
   init(player, speed); 
   
 };
+export const multiplayerGame = (MPGame:boolean) => {
+  let playerName = document.querySelector('.player-name')! as HTMLInputElement;
+  let currentLevel = document.querySelector('.level')! as HTMLInputElement;
+  const m_player = playerName.value === '' ? 'unknown' : playerName.value;
+  const m_speed = parseInt(currentLevel.value);
+  player = m_player;
+  level = m_speed;
+  speed = level;
+  backdrop.style.display = "none";
+  multiplayer = MPGame;
+  console.log(`multiplayer: ${multiplayer}`)
+  init(m_player, m_speed);   
+};
+
 
 const init = (name: string, selectedLevel: number) => {
   //NextPiece Canvas 
@@ -114,12 +128,13 @@ const init = (name: string, selectedLevel: number) => {
   //update high scores table
   localStorage.updateScoresTable();
   //if is a multiplayer game then send data
+  update(); 
+
   if(multiplayer){
     //initialize game status
     updateGameStatus(gameBoard,piece,records,gameOver,Header.PLAY)  
     shouldSendData(true)
   } 
-  update(); 
   
 };
 

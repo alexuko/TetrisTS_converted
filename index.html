@@ -16,16 +16,15 @@
             <div class="logo">tetris</div>
             <form action="#" class="game-form" method="POST">
                 <label for="player">Player </label>
-                <input type="text" class="input-value player-name" placeholder="unknown" name="player">
+                <input type="text" class="input-value player-name" placeholder="unknown" name="player" >
                 <label for="level">Level: 1 - 15</label>
                 <input type="number" class="input-value level" name="level" min="1" max="15" value="1">
                 <input type="submit" class="btn submit-btn" value="Play">
             </form>
 
-            <button class="btn-small" id="btn-create">Create game</button>
-            <p>my room</p>
-            <input type="text" class="game_room_id" name="game_room_id" id="game_room_id" placeholder="roomID" value="" readonly>
-            <button class="btn-small join-game-room">Join Game</button>
+            <button class="btn btn-small" id="btn-create">Create game</button>
+            <input type="text" class="game_room_id" name="game_room_id" id="game_room_id" placeholder="roomID" value="">
+            <button class="btn btn-small join-game-room" id="btn_joinGame">Join Game</button>
         </div>
     </div>
 
