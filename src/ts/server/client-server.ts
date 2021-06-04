@@ -9,7 +9,7 @@ import chalk from "chalk";
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 let ws:WebSocket;
 let contenders:string[] = [];
-const contendersBox = document.querySelector(".contenders")!;
+export const contendersBox = document.querySelector(".contenders")!;
 const btnCreate = document.querySelector('#btn-create')!;
 const btn_join = document.querySelector('#btn_joinGame')! as HTMLButtonElement;
 
@@ -68,8 +68,8 @@ const startListening = (ws:WebSocket) =>{
         const power = dataToJSON.power;
         if(power !== 0){
           console.warn("POWER: " + power)
-          if(power === 1) hardDrop();
-          if(power === 2) addExtraLine();
+          if(power === 3) hardDrop();
+          if(power > 3) addExtraLine();
         }
         drawContender(dataToJSON);
         break;
@@ -134,10 +134,12 @@ const joinGame = () => {
     gameIDtext = "";
     return;
   }
-
-  //if not connected yet then connect
-  let text = gameStatus.num_players - 1 === 1 ? 'player' : `${gameStatus.num_players - 1} players`;
+  let displayPlayersLeft = gameStatus.num_players - 1;
+  let text = displayPlayersLeft === 1 || (displayPlayersLeft !== NaN) ? 'player' : `${displayPlayersLeft} players`;
+  
   text = `Waiting for the other ${text}!`.toUpperCase();
+  
+  //if not connected yet then connect
   if (!ws){
     ws = connectToServer();
     if (ws) {
@@ -243,7 +245,7 @@ const getContenderHTMLelement = (ID:string) => {
 
 const newRivalPlayground = (data: any) => {
   // console.log(data)
-  const showContenderIn_UI = 1;
+  // const showContenderIn_UI = 1;
   const markup = `
             <article id="${data.clientID}" class="contender">
                 <h5 class="contender__name">${data.records._player}</h5>
@@ -258,8 +260,8 @@ const newRivalPlayground = (data: any) => {
                         <strong class="contender__records-lines">${data.records._lines}</strong>
                     </div>
                     <div class="record">
-                        <p>status:</p>
-                        <strong class="contender__records-status">${showContenderIn_UI}</strong>
+                        <p>level:</p>
+                        <strong class="contender__records-status">${data.records._level}</strong>
                     </div>
                 </div>
             </article>
@@ -291,11 +293,9 @@ const updateRecords = (rivalHTML: HTMLCanvasElement,data:any) => {
   let lines = records?.children.item(1)!.children.item(1)!;
   lines.textContent = data.records._lines;
   
-  //update status  
-  let text = '';
-  data.lost === false ? text = 'playing' : text = 'lost'  
-  let status = records?.children.item(2)!.children.item(1)!;
-  status.textContent = text.toUpperCase();
+  //update level  
+  let level = records?.children.item(2)!.children.item(1)!;
+  level.textContent = data.records._level;
   
   // get the canvas
   rivalHTML.childNodes.forEach(el => {

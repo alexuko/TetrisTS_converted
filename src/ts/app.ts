@@ -51,8 +51,9 @@ export const n_players = document.querySelector('#num_of_players')! as HTMLInput
 
 const pauseGame = () => {  
   //change status of the game with event listener
-  // console.log('pause button pressed')
-  if(multiplayer) return;
+  //*********************** */
+  // if(multiplayer) return;
+  //*********************** */
   isGamePaused = !isGamePaused;
   // console.log(isGamePaused)
   //change button dialog
@@ -222,9 +223,12 @@ const drawPiece = (ctx: any, currentPiece: any,gameBoard:number[][]) => {
 const setGameOver = () => {
   //set the gameover flag to true
   gameOver = true;
-  // alert("GAME OVER !");
-  updateGameStatus(gameBoard,piece,records,gameOver,Header.QUIT)
-  clientServer.sendGameStatus(gameStatus)
+  if(multiplayer){
+    updateGameStatus(gameBoard,piece,records,gameOver,Header.QUIT)
+    clientServer.sendGameStatus(gameStatus)
+    clientServer.contendersBox.innerHTML = '';
+    multiplayer = false;
+  }
   // clientServer.closeConnection();
   //save records in the local storage
   localStorage.saveToLocalStorage();
@@ -253,10 +257,10 @@ const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
     console.error("error erasing the piece: " + e);
   }
 };
-
-const checkFullRows = (rows?:number) => {
-  console.log('checkFullRows');
-  let fullRows = !rows ? 0 : rows;
+//------------------------------------------------------------------------------------
+const checkFullRows = () => {
+  // console.log('checkFullRows');
+  let fullRows = 0
   // iterate every row in the GB from bottom up
   for (let r = ROW - 1; r >= 0; r--) {
     // occupied will work as a counter
@@ -271,27 +275,21 @@ const checkFullRows = (rows?:number) => {
       //if 10 not empty spaces within a row are found then there's a complete row
       if (occupied === COL) {
         // increment Global number of rows counter
-        // fullRows += 1;
-        // debugger
         fullRows++;
-
-        console.log('rows completed' + fullRows)
         //pull rows down from the place where the full row was found        
         pullRowsDown(r);
         // apply this concurrent method to check for more full rows if any
-        checkFullRows(fullRows);
-        
+        checkFullRows();        
       }
     }
   }
   
   if(fullRows > 0) {
-    console.log('NO more Lines to check, total: ' + fullRows)
-    
+    console.log('NO more Lines to check, total: ' + fullRows)    
     lines += fullRows;
     spinPoints = spinPoints <= 0 ? 1 : spinPoints;
-    fullRows < 4  ? (score += fullRows * 10 * spinPoints)
-                  : (score += fullRows * 20 * spinPoints);
+    fullRows < 4  ? (score += fullRows * 100 * spinPoints)
+                  : (score += fullRows * 200 * spinPoints);
     
     records.setLines(lines);
     records.setScore(score);
@@ -299,10 +297,13 @@ const checkFullRows = (rows?:number) => {
     level = records.setLevel(speed);
     spinPoints = 0;
     // Just for multiplayer send highest number of rows
-    if(multiplayer && gameStatus.power < fullRows) gameStatus.power = fullRows;
-    fullRows = 0;        
+    console.log('Full lines: ' + fullRows)
+    // if(multiplayer && gameStatus.power < fullRows) gameStatus.power = fullRows;
+    if(multiplayer) gameStatus.power += fullRows;
+    // console.log('gameStatus.power:' +  gameStatus.power)
+    // fullRows = 0;        
   }
-  console.log('END')
+
 };
 
 const setSpeed = (linesCompleted: number, level: number) => {
@@ -755,11 +756,11 @@ const shouldSendData = (send:boolean) => {
   if(send){
     sendToServer = setInterval(() => {
       // console.log(`KEEP sending`)
-      if(gameStatus.power > 0) console.log('gameStatus.power: ' + gameStatus.power)
+      // if(gameStatus.power > 0) console.log('gameStatus.power: ' + gameStatus.power)
       clientServer.sendGameStatus(gameStatus)
       gameStatus.power = 0;
-      //every 500milliseconds 
-    }, 250);
+      //every 300milliseconds 
+    }, 300);
   }else{
     console.log(`STOP sending`)    
     clearInterval(sendToServer);    
