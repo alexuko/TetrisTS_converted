@@ -44,11 +44,15 @@ const formValues = document.querySelectorAll(".input-value")! as NodeListOf<HTML
 const playBtn = document.querySelector(".submit-btn")! as HTMLInputElement;
 const backdrop = document.querySelector(".backdrop")! as HTMLElement;
 const pauseButton = document.querySelector('#play-pause-btn')! as HTMLButtonElement;
+export const gameID_field = document.querySelector('#game_room_id')! as HTMLInputElement;
+export const n_players = document.querySelector('#num_of_players')! as HTMLInputElement;
+
 
 
 const pauseGame = () => {  
   //change status of the game with event listener
   // console.log('pause button pressed')
+  if(multiplayer) return;
   isGamePaused = !isGamePaused;
   // console.log(isGamePaused)
   //change button dialog
@@ -59,7 +63,7 @@ const pauseGame = () => {
     buttonState = 'Play';
     pauseButton.classList.add('btn-play')
     //stop sending data to the server
-    shouldSendData(false);
+    if(multiplayer) shouldSendData(false);
   }  
   else{ //if Playing
     // console.log('game is on')
@@ -67,7 +71,7 @@ const pauseGame = () => {
     buttonState = 'Pause';
     pauseButton.classList.add('btn-pause')
     //restart sending data to the server
-    shouldSendData(true);
+    if(multiplayer) shouldSendData(true);
     update();
   }
   //set UI button status
@@ -226,6 +230,8 @@ const setGameOver = () => {
   localStorage.saveToLocalStorage();
   localStorage.updateScoresTable();
   shouldSendData(false);
+  gameID_field.value = '';
+  n_players.value = '2';
   backdrop.style.display = "flex";
 };  
 
@@ -248,8 +254,8 @@ const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
   }
 };
 
-const checkFullRows = () => {
-  let fullRows = 0;
+const checkFullRows = (rows?:number) => {
+  let fullRows = !rows ? 0 : rows;
   // iterate every row in the GB from bottom up
   for (let r = ROW - 1; r >= 0; r--) {
     // occupied will work as a counter
@@ -265,27 +271,31 @@ const checkFullRows = () => {
       if (occupied === COL) {
         // increment Global number of rows counter
         fullRows += 1;
-        //pull rows down from the place where the full row was found
+        //pull rows down from the place where the full row was found        
         pullRowsDown(r);
         // apply this concurrent method to check for more full rows if any
-        checkFullRows();
+        checkFullRows(fullRows);
       }
     }
   }
-  // change the score if achieved new lines
+  
   if (fullRows > 0) {
     lines += fullRows;
     spinPoints = spinPoints <= 0 ? 1 : spinPoints;
     fullRows < 4  ? (score += fullRows * 10 * spinPoints)
                   : (score += fullRows * 20 * spinPoints);
-    console.log(`lines:${fullRows}, score:${score}, spinPoints:${spinPoints}`);
+    // console.log(`lines:${fullRows}, score:${score}, spinPoints:${spinPoints}`);
     records.setLines(lines);
     records.setScore(score);
     speed = setSpeed(lines, level);
     level = records.setLevel(speed);
-    console.log(`level: ${level} speed: ${speed} lines: ${lines}`);
-    spinPoints = 0;    
-    
+    // console.log(`level: ${level} speed: ${speed} lines: ${lines}`);
+    spinPoints = 0;
+    if(multiplayer){
+      console.log('fullRows ' + fullRows)
+      if(fullRows > 1) clientServer.sendExtraLine();
+      if(fullRows === 1) clientServer.sendHardDrop();
+    }        
   }
 };
 
@@ -296,6 +306,25 @@ const setSpeed = (linesCompleted: number, level: number) => {
   //if modulo is zero then increment level by one, otherwise just return current level
   return linesCompleted % levelCompleted !== 0 ? speed : speed += 1;
   
+};
+
+export const pullRowsUp = () => {
+  console.log('pulls rows up ------')
+  const rand = Math.floor(Math.random() * COL);
+  console.log(rand)
+  for (let r = 0; r <= ROW-1; r++) {
+    for (let c = 0; c < COL; c++) {
+      //if row has a preceding row then switch current row by the preceding one
+      //if the row is the first row (0) then there is no rows before,
+      // so we set to zeros the entire row
+      if(r < ROW-1)  gameBoard[r][c] = gameBoard[r+1][c]
+      else if(r === ROW-1)  {
+        // c === rand ? gameBoard[r][c] = 0 : gameBoard[r][c] = gameBoard[r-1][c]
+        c === rand ? gameBoard[r][c] = 0 : gameBoard[r][c] = 1
+      }      
+    }
+  }
+  console.table(gameBoard)
 };
 
 const pullRowsDown = (from: number) => {
@@ -339,6 +368,7 @@ const moveDown = () => {
   } else {
     merge(piece);
     checkFullRows();
+    
     drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
     piece = getRandomPiece();
@@ -348,7 +378,7 @@ const moveDown = () => {
   }
 };
 
-const hardDrop = () => {
+export const hardDrop = () => {
   //get tetrominoe last occupied positions in its matrix (row and col)
   const tetroLastCol = piece.lastOccupiedRowOrCol(false);
   const tetroLastRow = piece.lastOccupiedRowOrCol(true);
@@ -366,6 +396,7 @@ const hardDrop = () => {
       else break;
     }
   }
+  
 };
 
 const moveRight = (rotateAction = false) => {

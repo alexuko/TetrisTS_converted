@@ -7,6 +7,11 @@ enum Header {
     REQ_GAME = 'REQ_GAME',
     NEW_GAME = 'NEW_GAME',
     START_GAME = 'START_GAME',
+    INVALID = 'INVALID',
+    HARD_DROP = 'HARD_DROP',
+    EXTRA_LINE = 'EXTRA_LINE',
+    POWER = 'POWER',
+    PUNISH = 'PUNISH',
     PLAY = 'PLAY',
     JOIN = 'JOIN',
     QUIT = 'QUIT'

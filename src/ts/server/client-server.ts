@@ -1,6 +1,6 @@
 import { SQ, ROW, COL, getColor } from "../assets/assets";
 import { gameStatus } from "../app";
-import { drawGameBoard, eraseGameBoard, drawPiece } from "../app";
+import { drawGameBoard, eraseGameBoard, drawPiece, hardDrop, pullRowsUp, gameID_field, n_players } from "../app";
 import { clonePiece } from "../classes/piece";
 import { Header } from "../assets/assets";
 import { multiplayerGame } from "../app";
@@ -10,7 +10,6 @@ let ws:WebSocket;
 let contenders:string[] = [];
 const contendersBox = document.querySelector(".contenders")!;
 const btnCreate = document.querySelector('#btn-create')!;
-const gameID_field = document.querySelector('#game_room_id')! as HTMLInputElement;
 const btn_join = document.querySelector('#btn_joinGame')! as HTMLButtonElement;
 
 const connection = () => {
@@ -27,29 +26,33 @@ const startListening = (ws:WebSocket) =>{
   
   ws.addEventListener("close", () => {
     console.log("desconnected from the server");
+
+    
   });
   
   ws.addEventListener("message", (msgRecv) => {
-    console.log("msgRecv");
+    // console.log("msgRecv");
     const data = msgRecv.data;
     const dataToJSON = JSON.parse(data);
     const header: string = dataToJSON.header;
   
-    console.log(dataToJSON);
+    // console.log(dataToJSON);
     switch (header) {
       case Header.CONNECT:
         //this will save the client ID
         const message = dataToJSON.message;
-        console.log(`Message received from server, This is your ID: ${message}`);
+        // console.log(`Message received from server, This is your ID: ${message}`);
         gameStatus.clientID = message;
   
-        console.log(`Status: ID: ${gameStatus.clientID}`);
+        // console.log(`Status: ID: ${gameStatus.clientID}`);
         break;
       case Header.NEW_GAME:
         //request the server to create a new game
         console.log("new game");
         const gameID = dataToJSON.gameID
+        const num_players = dataToJSON.num_players
         gameID_field.value = gameID;
+        n_players.value = num_players;
         gameStatus.gameID = gameID;
         console.log(gameStatus)
         break;
@@ -63,6 +66,21 @@ const startListening = (ws:WebSocket) =>{
         //send your game status to the server
         drawContender(data);
         break;
+      case Header.HARD_DROP:
+        console.log(dataToJSON)
+        hardDrop()
+        break;
+        case Header.EXTRA_LINE:
+        console.log(dataToJSON)
+        pullRowsUp()
+        break;
+      case Header.INVALID:
+        n_players.value = '2';
+        gameID_field.value = 'invalid game ID!'.toUpperCase();
+        setTimeout(() => {
+          gameID_field.value = '';          
+        }, 1000);
+        break;
       case Header.QUIT:
         //tell server that you have lost
         const contenderID: string = dataToJSON.clientID;
@@ -75,10 +93,6 @@ const startListening = (ws:WebSocket) =>{
   });
 }
 
-
-
-
-
 const requestCreateGame = () => {
   //if not connected yet then connect
   if (!ws) ws = connectToServer();
@@ -89,9 +103,11 @@ const requestCreateGame = () => {
     try {
       setTimeout(() => {
         // message we are going to send
+        gameStatus.num_players = getNumOfPlayers();
         const msg = {
           header: Header.REQ_GAME,
           user: gameStatus.clientID,
+          num_players: gameStatus.num_players
         };
         // check that ready state is 1 or connected
         if (ws.readyState === 1) ws.send(JSON.stringify(msg));
@@ -101,6 +117,33 @@ const requestCreateGame = () => {
     }
   }
 };
+
+export const sendHardDrop = () => {
+  console.log('sendHardDrop()')
+  const msg = {
+    header: Header.POWER
+  };
+  ws.send(JSON.stringify(msg));
+  
+}
+
+export const sendExtraLine = () => {
+  console.log('sendExtraLine()')
+  const msg = {
+    header: Header.PUNISH
+  };
+  ws.send(JSON.stringify(msg));
+  
+}
+
+const getNumOfPlayers = () => {
+  let num = parseInt(n_players.value);
+  //check that number is within the limit of players
+  if(num < 2) return 2 
+  if(num > 7) return 7
+     
+  return num;
+}
 
 const joinGame = () => {
   console.log("join game");
@@ -112,7 +155,8 @@ const joinGame = () => {
   }
 
   //if not connected yet then connect
-  const text = "The game will start shortly!".toUpperCase();
+  let text = gameStatus.num_players - 1 === 1 ? 'player' : `${gameStatus.num_players - 1} players`;
+  text = `Waiting for the other ${text}!`.toUpperCase();
   if (!ws){
     ws = connectToServer();
     if (ws) {
@@ -151,31 +195,7 @@ const joinGame = () => {
     gameID_field.value = text;   
   }
   
-
-
-  // //if a valid ID is provided
-  // gameStatus.gameID = gameIDtext;
-  // const msg = {
-  //   header: Header.JOIN,
-  //   clientID: gameStatus.clientID,
-  //   gameID: gameStatus.gameID
-  // };
-  // ws.send(JSON.stringify(msg));
-  // console.log('valid')
-
-  // gameID_field.value = 'Click Play to start';
 };
-
-
-
-btnCreate.addEventListener('click', requestCreateGame)
-btn_join.addEventListener('click', joinGame)
-
-
-
-
-
-
 
 const drawContender = (data:any) => {
    try {
@@ -353,3 +373,5 @@ export const closeConnection = () => {
   ws.close(1000,'Player lost then a new connection is required')  
 }
 
+btnCreate.addEventListener('click', requestCreateGame)
+btn_join.addEventListener('click', joinGame)
