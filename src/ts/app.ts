@@ -255,6 +255,7 @@ const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
 };
 
 const checkFullRows = (rows?:number) => {
+  console.log('checkFullRows');
   let fullRows = !rows ? 0 : rows;
   // iterate every row in the GB from bottom up
   for (let r = ROW - 1; r >= 0; r--) {
@@ -270,33 +271,38 @@ const checkFullRows = (rows?:number) => {
       //if 10 not empty spaces within a row are found then there's a complete row
       if (occupied === COL) {
         // increment Global number of rows counter
-        fullRows += 1;
+        // fullRows += 1;
+        // debugger
+        fullRows++;
+
+        console.log('rows completed' + fullRows)
         //pull rows down from the place where the full row was found        
         pullRowsDown(r);
         // apply this concurrent method to check for more full rows if any
         checkFullRows(fullRows);
+        
       }
     }
   }
   
-  if (fullRows > 0) {
+  if(fullRows > 0) {
+    console.log('NO more Lines to check, total: ' + fullRows)
+    
     lines += fullRows;
     spinPoints = spinPoints <= 0 ? 1 : spinPoints;
     fullRows < 4  ? (score += fullRows * 10 * spinPoints)
                   : (score += fullRows * 20 * spinPoints);
-    // console.log(`lines:${fullRows}, score:${score}, spinPoints:${spinPoints}`);
+    
     records.setLines(lines);
     records.setScore(score);
     speed = setSpeed(lines, level);
     level = records.setLevel(speed);
-    // console.log(`level: ${level} speed: ${speed} lines: ${lines}`);
     spinPoints = 0;
-    if(multiplayer){
-      console.log('fullRows ' + fullRows)
-      if(fullRows > 1) clientServer.sendExtraLine();
-      if(fullRows === 1) clientServer.sendHardDrop();
-    }        
+    // Just for multiplayer send highest number of rows
+    if(multiplayer && gameStatus.power < fullRows) gameStatus.power = fullRows;
+    fullRows = 0;        
   }
+  console.log('END')
 };
 
 const setSpeed = (linesCompleted: number, level: number) => {
@@ -308,10 +314,10 @@ const setSpeed = (linesCompleted: number, level: number) => {
   
 };
 
-export const pullRowsUp = () => {
-  console.log('pulls rows up ------')
-  const rand = Math.floor(Math.random() * COL);
-  console.log(rand)
+export const addExtraLine = () => {
+  // get a empty space in the extra line
+  const hollow = Math.floor(Math.random() * COL);
+  //pull rows up
   for (let r = 0; r <= ROW-1; r++) {
     for (let c = 0; c < COL; c++) {
       //if row has a preceding row then switch current row by the preceding one
@@ -319,12 +325,14 @@ export const pullRowsUp = () => {
       // so we set to zeros the entire row
       if(r < ROW-1)  gameBoard[r][c] = gameBoard[r+1][c]
       else if(r === ROW-1)  {
-        // c === rand ? gameBoard[r][c] = 0 : gameBoard[r][c] = gameBoard[r-1][c]
-        c === rand ? gameBoard[r][c] = 0 : gameBoard[r][c] = 1
+        // set the extra line at the bottom of the gameboard
+        // also set the hollow space 
+        c === hollow ? gameBoard[r][c] = 0 : gameBoard[r][c] = 7
       }      
     }
   }
-  console.table(gameBoard)
+  //redraw the board to see changes immediately
+  drawGameBoard(gameBoard, GBctx, ROW, COL);
 };
 
 const pullRowsDown = (from: number) => {
@@ -746,10 +754,12 @@ const shouldSendData = (send:boolean) => {
   console.log(`Sending data --> ${send}`)
   if(send){
     sendToServer = setInterval(() => {
-      // console.log(`KEEP sending`)    
+      // console.log(`KEEP sending`)
+      if(gameStatus.power > 0) console.log('gameStatus.power: ' + gameStatus.power)
       clientServer.sendGameStatus(gameStatus)
+      gameStatus.power = 0;
       //every 500milliseconds 
-    }, 500);
+    }, 250);
   }else{
     console.log(`STOP sending`)    
     clearInterval(sendToServer);    
@@ -782,6 +792,8 @@ const updateGameStatus = (gameBoard: number[][], piece: Piece, records: Records,
     gameStatus.piece = piece;
     gameStatus.records = records;
     gameStatus.gameboard = gameBoard;
+    
+
     
 }
 

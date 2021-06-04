@@ -1,9 +1,10 @@
 import { SQ, ROW, COL, getColor } from "../assets/assets";
 import { gameStatus } from "../app";
-import { drawGameBoard, eraseGameBoard, drawPiece, hardDrop, pullRowsUp, gameID_field, n_players } from "../app";
+import { drawGameBoard, eraseGameBoard, drawPiece, hardDrop, addExtraLine, gameID_field, n_players } from "../app";
 import { clonePiece } from "../classes/piece";
 import { Header } from "../assets/assets";
 import { multiplayerGame } from "../app";
+import chalk from "chalk";
 
 // -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 let ws:WebSocket;
@@ -64,15 +65,13 @@ const startListening = (ws:WebSocket) =>{
         break;
       case Header.PLAY:
         //send your game status to the server
-        drawContender(data);
-        break;
-      case Header.HARD_DROP:
-        console.log(dataToJSON)
-        hardDrop()
-        break;
-        case Header.EXTRA_LINE:
-        console.log(dataToJSON)
-        pullRowsUp()
+        const power = dataToJSON.power;
+        if(power !== 0){
+          console.warn("POWER: " + power)
+          if(power === 1) hardDrop();
+          if(power === 2) addExtraLine();
+        }
+        drawContender(dataToJSON);
         break;
       case Header.INVALID:
         n_players.value = '2';
@@ -117,24 +116,6 @@ const requestCreateGame = () => {
     }
   }
 };
-
-export const sendHardDrop = () => {
-  console.log('sendHardDrop()')
-  const msg = {
-    header: Header.POWER
-  };
-  ws.send(JSON.stringify(msg));
-  
-}
-
-export const sendExtraLine = () => {
-  console.log('sendExtraLine()')
-  const msg = {
-    header: Header.PUNISH
-  };
-  ws.send(JSON.stringify(msg));
-  
-}
 
 const getNumOfPlayers = () => {
   let num = parseInt(n_players.value);
@@ -197,9 +178,9 @@ const joinGame = () => {
   
 };
 
-const drawContender = (data:any) => {
+const drawContender = (contenderData:any) => {
    try {
-      const contenderData = JSON.parse(data);
+      // const contenderData = JSON.parse(data);
       //get the ID so we can check if the client is already in the list of playeres
       const contenderID:string = contenderData.clientID;
       //get the index of the player, if not existent then returns -1

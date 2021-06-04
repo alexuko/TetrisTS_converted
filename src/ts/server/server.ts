@@ -1,18 +1,20 @@
 import WebSocket from "ws";
 import { v4 as uuid } from "uuid";
 import { Header } from "../assets/assets";
+import chalk from 'chalk';
 const wss = new WebSocket.Server({ port: 8080 });
 let clients: string[] = [];
 let games: any = {};
-
-const removeClient = (clientLeaving: string) => {
+let check = chalk.bold.yellow;
+const removeClient = (clientLeaving: string, ws:WebSocket) => {
   console.log("Client session closed");
   //find its index to eliminate user from the array
   const clientIndex = clients.findIndex((client) => client === clientLeaving);
   //then remove client from the array with the index
   clients.splice(clientIndex, 1);
+  ws.terminate()
   //testing
-  console.log(`Clients left in Server: ${clients}`);
+  console.log(check(`Number of clients ${wss.clients.size}`));
   if(clients.length < 1){
     clients = []
     games = {}
@@ -33,6 +35,7 @@ const addClient = (ws: WebSocket) => {
   ws.send(response);
 
   clients.push(client_id);
+  console.log(check(`Number of clients ${wss.clients.size}`));
   console.log(
     `New client,clientID: ${client_id}, Clients connected: ${clients.length}`
   );
@@ -65,21 +68,6 @@ const invalidGameID = () => {
   };
   return JSON.stringify(msg);
 }
-
-const hardDrop = () => {
-  const msg = {
-    header: Header.HARD_DROP    
-  };
-  return JSON.stringify(msg);
-}
-
-const punishmentLine = () => {
-  const msg = {
-    header: Header.EXTRA_LINE    
-  };
-  return JSON.stringify(msg);
-}
-
 
 wss.on("connection", (ws, req) => {
   // create a new client
@@ -160,21 +148,13 @@ wss.on("connection", (ws, req) => {
 
         break;
       case Header.PLAY:
-        //broadcast client message to everyone        
+        //broadcast client message to everyone    
         broadcastNotYou(ws, message);
-        break;
-      case Header.POWER:
-        console.log(messageToJSON)
-        broadcastNotYou(ws,hardDrop())
-        break;
-      case Header.PUNISH:
-        console.log(messageToJSON)
-        broadcastNotYou(ws,punishmentLine())
         break;
       case Header.QUIT:
         //client lost
         broadcast(ws, message);
-        removeClient(newClient);
+        removeClient(newClient,ws);
         break;
       default:
         console.log("Unknown action");
@@ -186,7 +166,8 @@ wss.on("connection", (ws, req) => {
     let msg = { header: Header.QUIT, clientID: newClient };
     //notify everyone tha the client dropped the connection
     const message = JSON.stringify(msg);
+    ws.close()
     broadcast(ws, message);
-    removeClient(newClient);
+    removeClient(newClient,ws);
   });
 });
