@@ -1,6 +1,6 @@
 // const chalk = require('chalk');
 import { v4 as uuid } from "uuid";
-import {gameStatus} from '../app'
+import {gameStatus} from '../controller'
 
 let myStorage:Storage;
 

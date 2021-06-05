@@ -1,12 +1,10 @@
 import { SQ, ROW, COL, getColor } from "../assets/assets";
-import { gameStatus } from "../app";
-import { drawGameBoard, eraseGameBoard, drawPiece, hardDrop, addExtraLine, gameID_field, n_players } from "../app";
+import { gameStatus } from "../controller";
+import { drawGameBoard, eraseGameBoard, drawPiece, hardDrop, addExtraLine, gameID_field, n_players } from "../controller";
 import { clonePiece } from "../classes/piece";
 import { Header } from "../assets/assets";
-import { multiplayerGame } from "../app";
-import chalk from "chalk";
+import { multiplayerGame } from "../controller";
 
-// -- Server -- Server -- Server -- Server -- Server -- Server -- Server //
 let ws:WebSocket;
 let contenders:string[] = [];
 export const contendersBox = document.querySelector(".contenders")!;
