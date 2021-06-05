@@ -4,36 +4,42 @@ import {gameStatus} from '../app'
 
 let myStorage:Storage;
 
+/**
+ * Save scores into the local storage
+ * @returns "1" succesfully saved OR -1 if not 
+ */
 const saveToLocalStorage = () => {
+    console.log('saveToLocalStorage')
     try{
       //get the local storage object
       myStorage = window.localStorage;
-      const clientID = gameStatus.clientID;
+      // From the Game status get the HTML elements
+      const clientID = gameStatus.clientID === undefined ? uuid() : gameStatus.clientID;
       const player = gameStatus.records.player;
       const score = gameStatus.records.score;
       const value2Bstored = `${player},${score}`
-      //check if client already exist in the storage list
+      //get user ID
       const keyID = myStorage.getItem(clientID);
-
+      //check if client already exist in the storage list
       //is there is a register within the list of keys in storage
       if(keyID !== null){
         //get the values of the key (name and score)
+        //create a new ID for the player
         const newID = uuid()
+        //save the string to the local storage
         myStorage.setItem(newID, value2Bstored);
-        // console.log(`Same connection, new record: player:${player}, score:${score}`)        
       }else{
         //is not in the list, then its a new record or list is empty
         if(myStorage.length < 1){
           // first record
           myStorage.setItem(clientID, value2Bstored);
-          // console.log(`First record saved: player:${player}, score:${score}`)
           // return 0;      
         }        
         
         myStorage.setItem(clientID, value2Bstored);
-        // console.log(`Record saved: player:${player}, score:${score}`)
       }
-      return 1
+      console.log(`Record saved: player:${player}, score:${score}`)
+      return 1;
     
     }catch(error){
       console.log('could save data OR denied permissions')
@@ -43,40 +49,42 @@ const saveToLocalStorage = () => {
 }
   
 const compareScores = () => {
-    // console.log('comparing...')
+    // Compare saved scores in Local storage 
     let storage = Object.entries(window.localStorage);
+    //create an array so we can sort them later
     let arr:any[] = [];
-    
+    // iterate through the LS and add them to the array    
     for(let i=0; i < storage.length; i++){
       arr.push(storage[i])
     }
+
     // check if there's more than  one value on the array, so we have something to compare
     if ( arr.length <= 1 ) return arr;
-
     //get the score value and compare it 
     for (let x = 0; x < arr.length; x++) {
+      // we reference the first element of the array and compare with the rest of the elements on the array
       let min = x;
-      // de aqui en adelante hay que darle.
+      // we start the second loop to compare our reference
       for (let y = x; y < arr.length; y++) {
+        //we split our string and make if an array getting only the numerical portion 
         let currScore: any = Array.from(arr[min][1].split(","))[1];
+        //parse it to int as it is still a string
         currScore = parseInt(currScore);
         // console.log(currScore);
         let nextScore: any = Array.from(arr[y][1].split(","))[1];
         nextScore = parseInt(nextScore);
-
+        // we will order from highest to lowest so,
+        // we compare the current with the next values.
         if (currScore < nextScore) {
           min = y;
         }
       }
       //swap values
-      // console.log('swap')
       let temp = arr[x];
         arr[x] = arr[min];
-      arr[min] = temp;
-      
+      arr[min] = temp;      
 
     }
-    // console.log('completed')
     return arr;
 }
   

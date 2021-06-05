@@ -108,20 +108,22 @@ button#btn_joinGame:hover{
 input#game_room_id{
     width: 100%;
     font-size: 2rem;
-    padding: 1rem;
+    padding: 1.5rem;
 
 }
 input[type=text]:placeholder-shown {
     color: white;
     font-weight: 100;
-    font-size: 1rem;
+    font-size: 2rem;
+    padding: 1.5rem;
 
 }
 
 input[type=text],
 input[type=number]{   
     width: 100%;    
-    padding: .5rem 1rem;
+    font-size: 2rem;
+    padding: 1.5rem;
     text-align: center;
     border-radius: 0 0 7px 7px ;
     background: linear-gradient(rgba(248, 248, 248, 0.1) 0%, hsla(0, 0%, 10%, 0.2) 20% ,hsla(0, 0%, 7%, 0.226) 50%, transparent 100%);
@@ -139,7 +141,9 @@ input[type=submit]{
     padding: 1rem 2rem;
     background-color: rgb(243, 102, 20);
 }
-
+#players_in_game{
+    margin-bottom: 1rem;
+}
 .btn{
     padding: .7rem 3rem;
     border-radius: 5px;

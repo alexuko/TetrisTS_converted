@@ -284,27 +284,26 @@ const checkFullRows = () => {
     }
   }
   
-  if(fullRows > 0) {
-    console.log('NO more Lines to check, total: ' + fullRows)    
-    lines += fullRows;
-    spinPoints = spinPoints <= 0 ? 1 : spinPoints;
-    fullRows < 4  ? (score += fullRows * 100 * spinPoints)
-                  : (score += fullRows * 200 * spinPoints);
-    
-    records.setLines(lines);
-    records.setScore(score);
-    speed = setSpeed(lines, level);
-    level = records.setLevel(speed);
-    spinPoints = 0;
-    // Just for multiplayer send highest number of rows
-    console.log('Full lines: ' + fullRows)
-    // if(multiplayer && gameStatus.power < fullRows) gameStatus.power = fullRows;
-    if(multiplayer) gameStatus.power += fullRows;
-    // console.log('gameStatus.power:' +  gameStatus.power)
-    // fullRows = 0;        
-  }
+  if(fullRows > 0) updateRecords(fullRows);
 
 };
+const updateRecords =(linesCompleted:number) => {
+  lines += linesCompleted;
+  // spinPoints = spinPoints <= 0 ? 1 : spinPoints;
+  console.log(spinPoints)
+  //calculations
+  let points = 100;
+  let result=  points * level * linesCompleted + spinPoints * level * 10; 
+  score +=  result; 
+  
+  records.setLines(lines);
+  records.setScore(score);
+  speed = setSpeed(lines, level);
+  level = records.setLevel(speed);
+  spinPoints = 0;
+  // Just for multiplayer send highest number of rows
+  if(multiplayer) gameStatus.power += linesCompleted;
+}
 
 const setSpeed = (linesCompleted: number, level: number) => {
   // 5 - 1 = 4/10
