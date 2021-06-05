@@ -12,6 +12,7 @@ import { Header } from "./assets/assets";
 let score: number,
   player: string,
   multiplayer:boolean,
+  current_lines: number = 0,
   lines: number,
   level: number,
   speed: number = 0,
@@ -257,7 +258,7 @@ const erasePiece = (ctx: CanvasRenderingContext2D, currentPiece: Piece) => {
     console.error("error erasing the piece: " + e);
   }
 };
-//------------------------------------------------------------------------------------
+
 const checkFullRows = () => {
   // console.log('checkFullRows');
   let fullRows = 0
@@ -284,15 +285,18 @@ const checkFullRows = () => {
     }
   }
   
-  if(fullRows > 0) updateRecords(fullRows);
+  if(fullRows > 0) current_lines += fullRows
 
 };
+
 const updateRecords =(linesCompleted:number) => {
   lines += linesCompleted;
-  // spinPoints = spinPoints <= 0 ? 1 : spinPoints;
-  console.log(spinPoints)
   //calculations
-  let points = 100;
+  let points = 0;
+  if (linesCompleted === 1) points = 50;
+  if (linesCompleted === 2) points = 100;
+  if (linesCompleted === 3) points = 200;
+  if (linesCompleted === 4) points = 400;
   let result=  points * level * linesCompleted + spinPoints * level * 10; 
   score +=  result; 
   
@@ -303,6 +307,7 @@ const updateRecords =(linesCompleted:number) => {
   spinPoints = 0;
   // Just for multiplayer send highest number of rows
   if(multiplayer) gameStatus.power += linesCompleted;
+  current_lines = 0;
 }
 
 const setSpeed = (linesCompleted: number, level: number) => {
@@ -376,7 +381,7 @@ const moveDown = () => {
   } else {
     merge(piece);
     checkFullRows();
-    
+    if(current_lines > 0) updateRecords(current_lines);
     drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
     piece = getRandomPiece();
