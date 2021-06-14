@@ -293,7 +293,9 @@ const updateRecords = (linesCompleted: number) => {
   if (linesCompleted === 2) points = 100;
   if (linesCompleted === 3) points = 200;
   if (linesCompleted === 4) points = 400;
-  let result = points * level * linesCompleted + spinPoints * level * 10;
+  console.log(`lines completed: ${linesCompleted} level: ${level} spinPoints ${spinPoints} total spin points  ${spinPoints * level}`)
+  let result = points * level * linesCompleted + spinPoints * level;
+  console.log(`Added to score ${result} + current score: ${score}`)
   score += result;
 
   records.setLines(lines);
@@ -307,11 +309,10 @@ const updateRecords = (linesCompleted: number) => {
 };
 
 const setSpeed = (linesCompleted: number, level: number) => {
-  // 5 - 1 = 4/10
+  if (linesCompleted <= 0) return speed;
   const levelCompleted = 10;
-  if (linesCompleted <= 0) return 1;
   //if modulo is zero then increment level by one, otherwise just return current level
-  return linesCompleted % levelCompleted !== 0 ? speed : speed += 1;
+  return linesCompleted % levelCompleted === 0 ? speed += 1 : speed;
   
 };
 
@@ -362,10 +363,12 @@ const merge = (piece:Piece) => {
         gameBoard[piece.y + r][piece.x + c] = piece.activeTetrominoe[r][c];
       }
     }
+    
   } catch (e) {
     //this error will pop out if a problem with merging the piece most likely when piece merges out of bounds ( negative rows)
     console.error("Error merging the piece: " + e);
   }
+  
 };
 
 const moveDown = () => {
@@ -378,6 +381,13 @@ const moveDown = () => {
     merge(piece);
     checkFullRows();
     if(current_lines > 0) updateRecords(current_lines);
+    //no lines but spin points
+    if(spinPoints > 0){ 
+      score += spinPoints;
+      records.setScore(score);
+      spinPoints = 0;
+    }
+    //draw gameboard with all changes made
     drawGameBoard(gameBoard, GBctx, ROW, COL);
     lockedPiece = true;
     piece = getRandomPiece();
@@ -497,19 +507,22 @@ const SRS = (
   rotaTimes: number,
   testTimes?: number
 ) => {
+  //fist time test then zero
   let count = !testTimes ? 0 : testTimes;
-
+  // if piece has rotated 4 time alreaty then return the initial values
   if (rotaTimes > 4) return [xVal, yVal];
 
   let offsets: number[][] = [];
   //J, L, S, T, Z tetrominoes
   if (piece.number !== 6) {
     if (clockwise) {
+      //clockwise
       if (piece.position === 0) offsets = tests.offset1;
       if (piece.position === 1) offsets = tests.offset2;
       if (piece.position === 2) offsets = tests.offset3;
       if (piece.position === 3) offsets = tests.offset4;
     } else {
+      //counterclockwise
       if (piece.position === 3) offsets = tests.offset4;
       if (piece.position === 2) offsets = tests.offset3;
       if (piece.position === 1) offsets = tests.offset2;
@@ -518,28 +531,32 @@ const SRS = (
   } else {
     //is I tetrominoe
     if (clockwise) {
+      //clockwise
       if (piece.position === 0) offsets = tests.offset5;
       if (piece.position === 1) offsets = tests.offset6;
       if (piece.position === 2) offsets = tests.offset7;
       if (piece.position === 3) offsets = tests.offset8;
     } else {
+      //counterclockwise
       if (piece.position === 0) offsets = tests.offset6;
       if (piece.position === 3) offsets = tests.offset5;
       if (piece.position === 2) offsets = tests.offset8;
       if (piece.position === 1) offsets = tests.offset7;
     }
   }
-
+  // set offset to the piece
   piece.x += offsets[count][0];
   piece.y += offsets[count][1];
   // console.log(`piece after offset x:${piece.x}, y:${piece.y}  `)
-
+  // check if overlaps
   if (piecesOverlapped()) {
     count++; //increment 1 to the count
     piece.x = xVal; //set the original X value to reevaluate
     piece.y = yVal; //set the original Y value to reevaluate
 
+    // if count is noy yet gone throught all of the test for that piece
     if (count < offsets.length) {
+      // run test again with the next offset 
       SRS(piece.x, piece.y, clockwise, rotaTimes, count); //same test, next index
     } else {
       count = 0; // set count to zero and so next test is evaluated from the beginning
@@ -547,11 +564,12 @@ const SRS = (
       else return [xVal, yVal]; // all test were evaluated, then return original values
     }
   }
-  // e.g. 0 + 1 = (1 * 1) * 10 = 10;
-  // e.g. 1 + 1 = (2 * 2) * 10 = 40;
-  // e.g. 2 + 1 = (3 * 3) * 10 = 90;
-  // e.g. 3 + 1 = (4 * 4) * 10 = 160; //Max spin points
-  spinPoints = (count + 1) * rotaTimes * 10;
+  //#OFRotations
+  // e.g. 0 + 1 = (1 * 1) * 50 = 50;
+  // e.g. 1 + 1 = (2 * 2) * 50 = 200;
+  // e.g. 2 + 1 = (3 * 3) * 50 = 450;
+  // e.g. 3 + 1 = (4 * 4) * 50 = 800; //Max spin points
+  spinPoints = (count + 1) * rotaTimes * 50;
   console.log("spin:" + spinPoints);
   //is piece did not overlapped then return the translated coordinates
   return [piece.x, piece.y];
@@ -827,9 +845,6 @@ export const keyControl = (e: any) => {
   }
 };
 
-// playBtn.addEventListener("click", startGame);
-// pauseButton.addEventListener('click', pauseGame);
-// ["keydown", "keyup"].forEach((e) => window.addEventListener(e, keyControl));
 
 export {
   drawGameBoard,

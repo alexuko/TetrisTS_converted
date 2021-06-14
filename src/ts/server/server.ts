@@ -2,10 +2,14 @@ import WebSocket from "ws";
 import { v4 as uuid } from "uuid";
 import { Header } from "../assets/assets";
 import chalk from 'chalk';
+
+
 const wss = new WebSocket.Server({ port: 8080 });
 let clients: string[] = [];
 let games: any = {};
 let check = chalk.bold.yellow;
+
+
 const removeClient = (clientLeaving: string, ws:WebSocket) => {
   console.log("Client session closed");
   //find its index to eliminate user from the array
@@ -116,17 +120,18 @@ wss.on("connection", (ws, req) => {
         
         //check if the game exists
         let game = games[gameID];
-        console.log("GAMES");
-        console.log(game);
+        // console.log("GAMES");
+        // console.log(game);
         try {
           if(!game){
             broadcast(ws,invalidGameID());
             return;
           }
           else {
+            
             game.players.push(clientID);
-            console.log(`game.players.length ${  game.players.length }`)
-            console.log(`num_players ${game.num_players}`)
+            // console.log(`game.players.length ${  game.players.length }`)
+            // console.log(`num_players ${game.num_players}`)
             if (game.players.length === game.num_players) {
               //play
               const msg = {
@@ -134,8 +139,8 @@ wss.on("connection", (ws, req) => {
                 playing: true,
                 multiplayer: true,
               };
-              console.log("HERE");
-              console.log(game);
+              // console.log("HERE");
+              // console.log(game);
               broadcast(ws, JSON.stringify(msg));
               return;
             }

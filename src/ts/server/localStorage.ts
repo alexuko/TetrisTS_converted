@@ -126,7 +126,6 @@ const updateScoresTable = () => {
     //display the backdrop menu again
        
 }
-
   
 export {
   saveToLocalStorage,        

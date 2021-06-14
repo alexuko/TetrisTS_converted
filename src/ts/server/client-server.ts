@@ -1,4 +1,4 @@
-import { SQ, ROW, COL, getColor } from "../assets/assets";
+import { SQ, ROW, COL } from "../assets/assets";
 import { gameStatus } from "../controller";
 import { drawGameBoard, eraseGameBoard, drawPiece, hardDrop, addExtraLine, gameID_field, n_players } from "../controller";
 import { clonePiece } from "../classes/piece";
@@ -7,8 +7,8 @@ import { multiplayerGame } from "../controller";
 
 let ws:WebSocket;
 let contenders:string[] = [];
-export const contendersBox = document.querySelector(".contenders")!;
-const btnCreate = document.querySelector('#btn-create')!;
+export const contendersBox = document.querySelector(".contenders")! as HTMLElement;
+const btnCreate = document.querySelector('#btn-create')! as HTMLButtonElement;
 const btn_join = document.querySelector('#btn_joinGame')! as HTMLButtonElement;
 
 const connection = () => {
@@ -47,36 +47,35 @@ const startListening = (ws:WebSocket) =>{
         break;
       case Header.NEW_GAME:
         //request the server to create a new game
-        console.log("new game");
+        // console.log("new game");
         const gameID = dataToJSON.gameID
         const num_players = dataToJSON.num_players
         gameID_field.value = gameID;
         n_players.value = num_players;
         gameStatus.gameID = gameID;
-        console.log(gameStatus)
+        // console.log(gameStatus)
         break;
       case Header.START_GAME:
-        console.log(dataToJSON)
+        // console.log(dataToJSON)
         const multiplayer: boolean = dataToJSON.multiplayer;
-        const playing: boolean = dataToJSON.playing;
+        // const playing: boolean = dataToJSON.playing;
         multiplayerGame(multiplayer);
         break;
       case Header.PLAY:
         //send your game status to the server
         const power = dataToJSON.power;
-        if(power !== 0){
-          console.warn("POWER: " + power)
-          if(power === 3) hardDrop();
-          if(power > 3) addExtraLine();
+        if(power !== undefined && power !== 0){
+          console.log("POWER" + power)
+          if(power === 1) hardDrop();
+          if(power > 1) addExtraLine();
         }
         drawContender(dataToJSON);
         break;
       case Header.INVALID:
         n_players.value = '2';
         gameID_field.value = 'invalid game ID!'.toUpperCase();
-        setTimeout(() => {
-          gameID_field.value = '';          
-        }, 1000);
+        //allow the user to see the invalid message and then clear the field
+        setTimeout(() => gameID_field.value = '', 1000);
         break;
       case Header.QUIT:
         //tell server that you have lost
@@ -180,7 +179,6 @@ const joinGame = () => {
 
 const drawContender = (contenderData:any) => {
    try {
-      // const contenderData = JSON.parse(data);
       //get the ID so we can check if the client is already in the list of playeres
       const contenderID:string = contenderData.clientID;
       //get the index of the player, if not existent then returns -1
@@ -211,14 +209,15 @@ const drawContender = (contenderData:any) => {
 const removeContender = (contenders: string[], indexContender: number, contenderID: string) => {
   console.log(`removeContender from the UI`)
   try{
-    // remove it from the array of contenders
-    contenders.splice(indexContender,1)
     //remove it from the node of contenders
     const child = getContenderHTMLelement(contenderID);
     //get child's parent
-    const parent = child.parentNode;
+    const parent = child.parentNode!;
     //if parent exist then remove child
-    if(parent) parent.removeChild(child);
+    // remove it from the array of contenders
+    contenders.splice(indexContender,1)
+    if(child && parent) parent.removeChild(child);
+    
 
   }catch(error){
     console.log( `something went wrong deleting contender ${error}`)
@@ -237,13 +236,11 @@ const getContenderHTMLelement = (ID:string) => {
     }
     else rivalCanvas;
   })
-
+  
   return rivalCanvas;
 }
 
 const newRivalPlayground = (data: any) => {
-  // console.log(data)
-  // const showContenderIn_UI = 1;
   const markup = `
             <article id="${data.clientID}" class="contender">
                 <h5 class="contender__name">${data.records._player}</h5>
@@ -266,7 +263,6 @@ const newRivalPlayground = (data: any) => {
   `;
   contendersBox.insertAdjacentHTML("beforeend", markup);
 
-  // PROBABLY A NEW FUNCTION WOULD BE GREAT
   const rival = document.querySelector(
     `#contender__canvas-${data.clientID}`
   )! as HTMLCanvasElement;
@@ -277,8 +273,7 @@ const updateRecords = (rivalHTML: HTMLCanvasElement,data:any) => {
   let canvas:any
   //update player name
   let player = rivalHTML.children.item(0)!;
-  player.textContent = data.records._player
-  
+  player.textContent = data.records._player  
   
   //get records node   
   let records = rivalHTML.children.item(2);
