@@ -1,5 +1,5 @@
-## Title
-* TETRIS: single & multiplayer
+## TETRIS
+* Single & Multiplayer
 ## About me
 * [Alex](https://alejandro-rivera.com/) check my other projects
 
@@ -8,7 +8,8 @@
 * Tetris Multiplayer
 * Records overview
 * Highest Scores
-* [KaTeX](https://khan.github.io/KaTeX/) Support
+* Visualise opponents
+* Attack opponents by completing more lines at once 
 
 ## How To Use
 
@@ -84,11 +85,6 @@ This software uses the following open source packages:
 - [TypeScript](https://www.typescriptlang.org/)
 - [WS](https://www.npmjs.com/package/ws)
 - [Chalk](https://www.npmjs.com/package/chalk)
-
-## Related
-
-[markdownify-web](https://github.com/amitmerchant1990/markdownify-web) - Web version of Markdownify
-
 
 
 ## License
